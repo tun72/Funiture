@@ -4,7 +4,7 @@ import MobileNavigation from './MobileNavigation'
 import { ModeToggle } from "@/components/mode-toggle"
 function Header() {
     return (
-        <header className='w-full border-b '>
+        <header className='w-full border-b fixed top-0 z-50 bg-background'>
             <nav className="container flex items-center h-16 mx-auto">
                 <MainNavigation items={siteConfig.mainNav} />
                 <MobileNavigation items={siteConfig.mainNav} />
