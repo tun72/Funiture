@@ -1,8 +1,7 @@
-import React from 'react'
 import { useParams } from 'react-router'
 
 function Detail() {
-    const {"*" : splat} = useParams()
+  const { "*": splat } = useParams()
   return (
     <div>Detail {splat}</div>
   )
