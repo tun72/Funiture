@@ -11,6 +11,7 @@ import {
 import { Link } from "react-router"
 import { AspectRatio } from "../ui/aspect-ratio"
 import { Icons } from "../icons"
+import { formatPrice } from "@/lib/utils"
 
 interface ProductProps {
     product: Product
@@ -32,8 +33,8 @@ function ProductCard({ product }: ProductProps) {
 
                 <CardContent className="space-y-1.5 p-4">
                     <CardTitle className="line-clamp-1 text-ld font-bold">{product.name}</CardTitle>
-                    <CardDescription className="line-clamp-1">${product.price}
-                        {product.discount > 0 && (<span className="ml-2 font-extralight line-through">${product.discount}</span>)}
+                    <CardDescription className="line-clamp-1">{formatPrice(product.price)}
+                        {product.discount > 0 && (<span className="ml-2 font-extralight line-through">{formatPrice(product.discount)}</span>)}
                     </CardDescription>
                 </CardContent>
             </Link>
