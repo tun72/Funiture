@@ -33,8 +33,8 @@ export default function CarouselCard({ products }: Products) {
                         <div className="flex p-4 lg:px-4 gap-4">
                             <img src={product.images[0]} alt={product.name} className="size-28 rounded-md" />
                             <div>
-                                <h3 className="text-sm font-bold">{product.name}</h3>
-                                <p className="my-2 text-sm text-gray-600">{product.description.length > 55 ? product.description.substring(0, 55) + " ..." : ""} </p>
+                                <h3 className="text-sm font-bold line-clamp-1">{product.name}</h3>
+                                <p className="my-2 text-sm text-gray-600 line-clamp-2">{product.description} </p>
                                 <Link to={`/products/${product.id}`} className="text-sm font-semibold text-brand hover:underline">read more</Link>
                             </div>
                         </div>
