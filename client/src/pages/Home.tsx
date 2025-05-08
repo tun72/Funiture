@@ -43,8 +43,8 @@ export default function Home() {
 
 
 const Title = ({ title, href, sideText }: { title: string, href: string, sideText: string }) => (
-  <div className="mt-28 mb-10 flex flex-col md:flex-row md:items-center md:justify-between underline">
+  <div className="mt-28 mb-10 flex flex-col md:flex-row md:items-center md:justify-between ">
     <h2 className="text-2xl font-bold mb-4 md:mb-0">{title}</h2>
-    <Link to={href} className="text-muted-foreground font-semibold">{sideText}</Link>
+    <Link to={href} className="text-muted-foreground font-semibold underline">{sideText}</Link>
   </div>
 )

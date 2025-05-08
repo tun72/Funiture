@@ -6,10 +6,11 @@ import Service from './pages/Service'
 import Error from './pages/Error'
 import Blog from "@/pages/blogs/Blog"
 import BlogDetail from '@/pages/blogs/BlogDetail'
-import BlogRootLayout from './pages/blogs/BlogRootLayout'
-import ProductRootLayout from './pages/products/ProductRootLayout'
-import Product from './pages/Product'
+import BlogRootLayout from '@/pages/blogs/BlogRootLayout'
+import ProductRootLayout from '@/pages/products/ProductRootLayout'
+
 import ProductDetail from './pages/products/ProductDetail'
+import Product from './pages/products/Product'
 
 export const router = createBrowserRouter([
     {
