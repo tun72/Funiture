@@ -8,7 +8,7 @@ import { posts } from "@/data/posts";
 export default function Home() {
 
 
-  return <div className="mt-16 container mx-auto px-4 md:px-0">
+  return <div className="container mx-auto px-4 md:px-0">
     <div className="flex flex-col lg:flex-row justify-between">
       <div className="text-center lg:text-left my-8 lg:mt-18 lb:mb-0 lg:w-2/5">
         <h1 className="text-4xl font-extrabold mb-4 text-brand lg:mb-8 lg:text-6xl">Modern Interior Design Studio</h1>
