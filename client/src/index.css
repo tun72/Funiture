@@ -118,3 +118,7 @@
     @apply bg-background text-foreground;
   }
 }
+
+@theme {
+  --color-brand: #3b5d50;
+}
