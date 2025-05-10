@@ -11,14 +11,15 @@ import {
 import { Link } from "react-router"
 import { AspectRatio } from "../ui/aspect-ratio"
 import { Icons } from "../icons"
-import { formatPrice } from "@/lib/utils"
+import { cn, formatPrice } from "@/lib/utils"
 
-interface ProductProps {
-    product: Product
+interface ProductProps extends React.HTMLAttributes<HTMLDivElement> {
+    product: Product,
+
 }
-function ProductCard({ product }: ProductProps) {
+function ProductCard({ product, className }: ProductProps) {
     return (
-        <Card className="size-full overflow-hidden rounded-lg p-0">
+        <Card className={cn("size-full overflow-hidden rounded-lg p-0 gap-0", className)}>
             <Link to={`/products/${product.id}`} aria-label={product.name}>
                 <div className="border-b p-0">
                     <AspectRatio ratio={1 / 1} className="bg-muted">
@@ -31,7 +32,7 @@ function ProductCard({ product }: ProductProps) {
                     </AspectRatio>
                 </div>
 
-                <CardContent className="space-y-1.5 p-4">
+                <CardContent className="space-y-1.5 px-4 py-2">
                     <CardTitle className="line-clamp-1 text-ld font-bold">{product.name}</CardTitle>
                     <CardDescription className="line-clamp-1">{formatPrice(product.price)}
                         {product.discount > 0 && (<span className="ml-2 font-extralight line-through">{formatPrice(product.discount)}</span>)}
@@ -39,15 +40,12 @@ function ProductCard({ product }: ProductProps) {
                 </CardContent>
             </Link>
 
-
-            <CardFooter className="p-4 pt-1">
+            <CardFooter className="px-4 pt-2 pb-4">
                 {product.status === "sold" ?
                     <Button size="sm" disabled={true} aria-label="Sold Out" className="h-8 w-full rounded-sm font-bold">Sold Out</Button> :
                     <Button size="sm" aria-label="Add to Cart" className="h-8 w-full rounded-sm bg-brand font-bold">
                         <Icons.plus className="" />Add To Cart
                     </Button>}
-
-
             </CardFooter>
         </Card>
     )
