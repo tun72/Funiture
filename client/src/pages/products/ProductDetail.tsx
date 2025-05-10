@@ -1,7 +1,9 @@
 import { Icons } from "@/components/icons"
+import AddToCartForm from "@/components/products/AddToCartForm"
 import AddToFavourite from "@/components/products/AddToFavourite"
 import ProductCard from "@/components/products/ProductCard"
 import Rating from "@/components/products/Rating"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
 
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel"
@@ -57,6 +59,20 @@ function ProductDetail() {
                                 <Rating rating={product.rating} />
                                 <AddToFavourite id={product.id} rating={product.rating} className="cursor-pointer" />
                             </div>
+
+                            <AddToCartForm canBuy={product.status === "active"} />
+                            <Separator className="my-1.5" />
+
+                            <Accordion type="single" collapsible className="w-full">
+                                <AccordionItem value="item-1" className="border-none">
+                                    <AccordionTrigger>
+                                        Description
+                                    </AccordionTrigger>
+                                    <AccordionContent>
+                                        {product.description ?? "No description is available for this product."}
+                                    </AccordionContent>
+                                </AccordionItem>
+                            </Accordion>
 
                         </div>
                     </> : <p></p>}
