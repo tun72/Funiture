@@ -34,7 +34,7 @@ export const router = createBrowserRouter([
                 Component: ProductRootLayout,
                 children: [
                     { index: true, Component: Product },
-                    { path: ":porductId", Component: ProductDetail },]
+                    { path: ":productId", Component: ProductDetail },]
             },
 
         ]
