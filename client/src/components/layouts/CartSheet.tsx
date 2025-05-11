@@ -3,7 +3,6 @@ import {
     Sheet,
     SheetClose,
     SheetContent,
-    SheetDescription,
     SheetHeader,
     SheetTitle,
     SheetTrigger,
@@ -13,9 +12,10 @@ import { Icons } from "../icons"
 import { Separator } from "../ui/separator";
 import { cartItems } from "@/data/carts";
 import { Link } from "react-router";
-import { ScrollArea } from "@radix-ui/react-scroll-area";
+
 import CartItem from "../carts/CartItem";
 import { formatPrice } from "@/lib/utils";
+import { ScrollArea } from "../ui/scroll-area";
 
 export default function CartSheet() {
     const itemCounts = 4;
@@ -37,7 +37,7 @@ export default function CartSheet() {
 
                 {cartItems.length > 0 ?
                     <>
-                        <ScrollArea className="h-[calc(100vh-16rem)] pb-8" >
+                        <ScrollArea className="h-[calc(100vh-16rem)] overflow-hidden pr-4" >
                             <div className="flex flex-col space-y-3 mt-2">
                                 {cartItems.map((item) => <CartItem key={item.id} cart={item} />)}
                             </div>
