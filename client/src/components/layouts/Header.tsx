@@ -5,7 +5,7 @@ import { ModeToggle } from "@/components/mode-toggle"
 function Header() {
     return (
         <header className='w-full border-b '>
-            <nav className="container flex items-center h-16 mx-auto">
+            <nav className="container flex items-center h-16 mx-auto xl:px-4">
                 <MainNavigation items={siteConfig.mainNav} />
                 <MobileNavigation items={siteConfig.mainNav} />
                 <div className="flex flex-1 items-center justify-end mr-4 space-x-4 lg:mr-0">
@@ -16,4 +16,4 @@ function Header() {
     )
 }
 
-export default Header
+export default Header 
