@@ -60,8 +60,10 @@ model Type {
 model User {
   id              Int       @id @default(autoincrement())
   firstName       String?   @db.VarChar(52)
+
   lastName        String?   
   phone           String    @unique @db.VarChar(52)
+
   email           String?   @unique @db.VarChar(52)
   role            Role      @default(USER)
   status          Status    @default(ACTIVE)
@@ -144,8 +146,10 @@ model ProductsOnOrder {
 
 model Otp {
   id            Int      @id @default(autoincrement())
+
   otp           String   
   phone         String   @unique @db.VarChar(52)
+
   rememberToken String
   verifyToken   String?
   count         Int      @default(0) @db.SmallInt

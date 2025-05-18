@@ -15,7 +15,8 @@ function Header() {
                     <CartSheet />
                     <ModeToggle />
                     <AuthDropDown user={User} />
-                </div>x
+
+                </div>
             </nav>
         </header>
     )
