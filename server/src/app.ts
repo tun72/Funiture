@@ -5,6 +5,11 @@ import cors from "cors";
 import morgan from "morgan";
 import { limiter } from "./middlewares/rateLimiter";
 import { check } from "./middlewares/check";
+import healthRoute from "./routes/v1/health";
+import authRoute from "./routes/v1/auth"
+
+export const app = express();
+
 
 import * as errorController from "./controllers/web/errorController";
 
@@ -23,6 +28,9 @@ app.use(express.json());
 app.use(cors()).use(helmet()).use(compression()).use(limiter);
 
 app.use("/api/v1", healthRoute);
+
+app.use("/api/v1", authRoute);
+
 
 app.use(viewRoute);
 
