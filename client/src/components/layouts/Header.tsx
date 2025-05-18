@@ -15,10 +15,11 @@ function Header() {
                     <CartSheet />
                     <ModeToggle />
                     <AuthDropDown user={User} />
+
                 </div>
             </nav>
         </header>
     )
 }
 
-export default Header
+export default Header 
