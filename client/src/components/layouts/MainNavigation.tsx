@@ -41,7 +41,7 @@ function MainNavigation({ items }: MainNavigationProps) {
                         className="from-muted/50 to-muted flex h-full w-full flex-col justify-end rounded-md bg-gradient-to-b p-6 no-underline outline-none select-none focus:shadow-md"
                         to="/"
                       >
-                      
+
 
                         <Icons.logo className="size-8 text-black" aria-hidden="true" />
 
@@ -70,12 +70,15 @@ function MainNavigation({ items }: MainNavigationProps) {
 
           {items?.[0]?.menu &&
             items?.[0]?.menu.map((menu) => (
-              <NavigationMenuItem>
-                <Link to={String(menu.href)}>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+              <NavigationMenuItem key={menu.title}>
+
+                <NavigationMenuLink className={navigationMenuTriggerStyle()} asChild>
+                  <Link to={String(menu.href)}>
                     {menu.title}
-                  </NavigationMenuLink>
-                </Link>
+                  </Link>
+                </NavigationMenuLink>
+
+
               </NavigationMenuItem>
             ))}
         </NavigationMenuList>
