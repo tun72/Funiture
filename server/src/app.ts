@@ -5,9 +5,17 @@ import cors from "cors";
 import morgan from "morgan";
 import { limiter } from "./middlewares/rateLimiter";
 import { check } from "./middlewares/check";
+
+import * as errorController from "./controllers/web/errorController";
+
 import healthRoute from "./routes/v1/health";
+import viewRoute from "./routes/v1/web/view";
 
 export const app = express();
+
+app.set("view engine", "ejs");
+app.set("views", "src/views");
+app.use(express.static("public"));
 
 app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: true }));
@@ -15,6 +23,10 @@ app.use(express.json());
 app.use(cors()).use(helmet()).use(compression()).use(limiter);
 
 app.use("/api/v1", healthRoute);
+
+app.use(viewRoute);
+
+app.use(errorController.notFound);
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   const status = err.status || 500;
