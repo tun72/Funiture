@@ -1,0 +1,6 @@
+{
+    "welcome": "Welcome to our funiture shop",
+    "wrongPassword": "Password is wrong",
+    "changeLng": "Successfully changed language. - {{ lang }}",
+    "accNotRegister": "This account is not registered!"
+}
