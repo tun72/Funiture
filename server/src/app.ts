@@ -9,18 +9,16 @@ import i18next from "i18next";
 import Backend from "i18next-fs-backend";
 import middleware from "i18next-http-middleware";
 import path from "node:path";
-// route
-import healthRoute from "./routes/v1/health";
-import authRoute from "./routes/v1/auth";
-import viewRoute from "./routes/v1/web/view";
-import userRoute from "./routes/v1/admin/user";
-import profileRoute from "./routes/v1/api/user";
 
-// middlewares
-import { auth } from "./middlewares/auth";
+import routes from "./routes/v1/index";
+import cron from "node-cron";
 
 // controllers
 import * as errorController from "./controllers/web/errorController";
+import {
+  createOrUpdateSettingStatus,
+  getSettingStatus,
+} from "./services/settingService";
 
 export const app = express();
 
@@ -71,19 +69,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json()).use(cookieParser());
 app.use(cors(corsOptions)).use(helmet()).use(compression()).use(limiter);
 
-app.use("/api/v1", healthRoute);
-
-// auth
-app.use("/api/v1", authRoute);
-
-// admin
-app.use("/api/v1/admin", auth, userRoute);
-
-// user
-app.use("/api/v1", profileRoute);
-
-app.use(viewRoute);
-
+app.use(routes);
 app.use(errorController.notFound);
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
@@ -91,4 +77,13 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   const message = err.message || "Server Error";
   const errorCode = err.code || "Error_Code";
   res.status(status).json({ message, error: errorCode });
+});
+
+cron.schedule("*/2 * * * *", async () => {
+  console.log("running a taske every two minutes for testing purpose");
+  const setting = await getSettingStatus("maintenance");
+  if (setting!.value === "true") {
+    await createOrUpdateSettingStatus("maintenance", "false");
+    console.log("Now maintenance mode is off");
+  }
 });
