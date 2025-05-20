@@ -4,17 +4,19 @@ import compression from "compression";
 import cors from "cors";
 import morgan from "morgan";
 import { limiter } from "./middlewares/rateLimiter";
-import { check } from "./middlewares/check";
+import cookieParser from "cookie-parser";
+
+// route
 import healthRoute from "./routes/v1/health";
-import authRoute from "./routes/v1/auth"
-
-export const app = express();
-
-
-import * as errorController from "./controllers/web/errorController";
-
-import healthRoute from "./routes/v1/health";
+import authRoute from "./routes/v1/auth";
 import viewRoute from "./routes/v1/web/view";
+import userRoute from "./routes/v1/admin/user";
+
+// middlewares
+import { auth } from "./middlewares/auth";
+
+// controllers
+import * as errorController from "./controllers/web/errorController";
 
 export const app = express();
 
@@ -22,15 +24,34 @@ app.set("view engine", "ejs");
 app.set("views", "src/views");
 app.use(express.static("public"));
 
+let whitelist = ["http://example1.com", "http://localhost:5173"];
+const corsOptions = {
+  origin: function (
+    origin: any,
+    callback: (err: Error | null, origin?: any) => void
+  ) {
+    if (!origin) return callback(null, true);
+    if (whitelist.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true, // Allow cookies or authorization header
+};
+
 app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(cors()).use(helmet()).use(compression()).use(limiter);
+app.use(express.json()).use(cookieParser());
+app.use(cors(corsOptions)).use(helmet()).use(compression()).use(limiter);
 
 app.use("/api/v1", healthRoute);
 
+// auth
 app.use("/api/v1", authRoute);
 
+// admin
+app.use("/api/v1/admin", auth, userRoute);
 
 app.use(viewRoute);
 
