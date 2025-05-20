@@ -366,7 +366,7 @@ export const login = [
         }
       }
       await updateUser(user!.id, userData);
-      const error: any = new Error("Incorrect Password");
+      const error: any = new Error(req.t("wrongPassword"));
       error.code = errorCode.invalid;
       error.status = 401;
       return next(error);
@@ -378,7 +378,7 @@ export const login = [
     const accessPrivate = process.env.ACCESS_SECRET_KEY;
     const refreshPrivate = process.env.REFRESH_SECRET_KEY;
     const accessToken = jwt.sign(assessTokenPayload, accessPrivate!, {
-      expiresIn: 60 * 1,
+      expiresIn: 60 * 15,
     });
     const refreshToken = jwt.sign(refreshTokenPayload, refreshPrivate!, {
       expiresIn: "30d",
@@ -396,7 +396,7 @@ export const login = [
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-        maxAge: 1 * 60 * 1000,
+        maxAge: 15 * 60 * 1000,
       })
       .cookie("refreshToken", refreshToken, {
         httpOnly: true,
@@ -478,3 +478,244 @@ export const logout = async (
     message: "Logout Success. See you soon.",
   });
 };
+
+export const forgetPassword = [
+  body("phone", "Invalid phone Number")
+    .trim("")
+    .notEmpty()
+    .matches(/^[0-9]+$/)
+    .isLength({ min: 5, max: 12 })
+    .withMessage("Phone number invalid."),
+  async (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req).array({ onlyFirstError: true });
+    if (errors.length) {
+      console.log(errors);
+      const error: any = new Error(errors[0].msg);
+      error.code = errorCode.invalid;
+      error.status = 400;
+      return next(error);
+    }
+    // return res.status(200).json({message : "success"})
+    let phone = req.body.phone;
+
+    const user = await getUserByPhone(phone);
+    checkUserIfNotExist(user);
+
+    let otpRow = await getOtpByPhone(phone);
+
+    let result;
+
+    if (!otpRow) {
+      const error: any = new Error("This request may be attack.");
+      error.status = 400;
+      error.code = errorCode.attack;
+      return next(error);
+    }
+
+    const otp = generateOTP();
+    console.log(otp);
+
+    const salt = await bcrypt.genSalt(10);
+    const hashOtp = await bcrypt.hash(otp.toString(), salt);
+    const token = generateToken();
+
+    const lastOtpReq = new Date(otpRow.updatedAt).toLocaleDateString();
+    const today = new Date().toLocaleDateString();
+    const isSameDate = lastOtpReq === today;
+    checkOtpErrorItSameDate(isSameDate, otpRow.error, otpRow.count);
+    if (!isSameDate) {
+      result = await updateOtp(otpRow.id, {
+        otp: hashOtp,
+        rememberToken: token,
+        count: 1,
+        error: 0,
+      });
+    } else {
+      result = await updateOtp(otpRow.id, {
+        otp: hashOtp,
+        rememberToken: token,
+        count: { increment: 1 },
+      });
+    }
+
+    res.status(200).json({
+      message: `Sending otp to 09${result.phone}`,
+      phone: result.phone,
+      token: result.rememberToken,
+    });
+  },
+];
+
+export const verify = [
+  body("phone", "Invalid phone Number")
+    .trim("")
+    .notEmpty()
+    .matches(/^[0-9]+$/)
+    .isLength({ min: 5, max: 12 })
+    .withMessage("Phone number invalid."),
+  body("otp", "Invalid otp")
+    .trim("")
+    .notEmpty()
+    .matches(/^[0-9]+$/)
+    .isLength({ min: 6, max: 6 })
+    .withMessage("Phone number invalid."),
+  body("token", "Invalid token").trim("").notEmpty().escape(),
+  async (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req).array({ onlyFirstError: true });
+
+    if (errors.length) {
+      // console.log(errors);
+      const error: any = new Error(errors[0].msg);
+      error.code = "Error_Invalid";
+      error.status = 400;
+      return next(error);
+    }
+
+    const { phone, otp, token } = req.body;
+
+    const user = await getUserByPhone(phone);
+    checkUserIfNotExist(user);
+
+    const otpRow = await getOtpByPhone(phone);
+    checkOtpRow(otpRow);
+
+    const lastOtpVerify = new Date(otpRow!.updatedAt).toLocaleDateString();
+    const today = new Date().toLocaleDateString();
+    const isSameDate = lastOtpVerify === today;
+    checkOtpErrorItSameDate(isSameDate, otpRow!.error, otpRow!.count);
+
+    const isOTPExpired =
+      moment().diff(moment(otpRow!.updatedAt), "minutes") > 2;
+
+    if (isOTPExpired) {
+      const error: any = new Error("Otp is expired");
+      error.code = errorCode.otpExpired;
+      error.status = 403;
+      return next(error);
+    }
+
+    if (otpRow?.rememberToken !== token) {
+      await updateOtp(otpRow!.id, { error: 5 });
+      const error: any = new Error("Invalid Token");
+      error.code = errorCode.invalid;
+      error.status = 400;
+      return next(error);
+    }
+
+    const isMatchOtp = await bcrypt.compare(otp, otpRow!.otp);
+
+    if (!isMatchOtp) {
+      if (!isSameDate) {
+        await updateOtp(otpRow!.id, { error: 1 });
+      } else {
+        await updateOtp(otpRow!.id, { error: { increment: 1 } });
+      }
+      const error: any = new Error("Otp is not correct");
+      error.code = errorCode.wrongOtp;
+      error.status = 400;
+      return next(error);
+    }
+
+    const verifyToken = generateToken();
+    const result = await updateOtp(otpRow!.id, {
+      verifyToken,
+      error: 0,
+      count: 1,
+    });
+
+    res.status(200).json({
+      message: "OTP is successfully verified! Please reset password.",
+      phone: result.phone,
+      verifyToken: result.verifyToken,
+    });
+  },
+];
+
+export const resetPassword = [
+  body("password", "Please provide a password.")
+    .trim("")
+    .notEmpty()
+    .isLength({ min: 8 })
+    .withMessage("Password must be minium of 8 characters."),
+  body("phone", "Invalid phone Number")
+    .trim("")
+    .notEmpty()
+    .matches(/^[0-9]+$/)
+    .isLength({ min: 5, max: 12 })
+    .withMessage("Phone number invalid."),
+  body("token", "Invalid token").trim("").notEmpty().escape(),
+
+  async (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req).array({ onlyFirstError: true });
+    if (errors.length) {
+      const error: any = new Error(errors[0].msg);
+      error.code = errorCode.invalid;
+      error.status = 400;
+      return next(error);
+    }
+
+    const { phone, password, token } = req.body;
+
+    const user = await getUserByPhone(phone);
+    checkUserIfNotExist(user);
+    const otpRow = await getOtpByPhone(phone);
+    checkOtpRow(otpRow);
+
+    if (otpRow!.error >= 5) {
+      const error: any = new Error("This request may be attack.");
+      error.status = 400;
+      error.code = errorCode.attack;
+      return next(error);
+    }
+
+    if (otpRow!.verifyToken !== token) {
+      await updateOtp(otpRow!.id, { error: 5 });
+      const error: any = new Error("This request may be attack.");
+      error.status = 400;
+      error.code = errorCode.attack;
+      return next(error);
+    }
+
+    const isExpired = moment().diff(moment(otpRow!.updatedAt), "minutes") > 5;
+
+    if (isExpired) {
+      const error: any = new Error(
+        "Your request is expired. Please try again."
+      );
+      error.code = errorCode.otpExpired;
+      error.status = 403;
+      return next(error);
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashPassword = await bcrypt.hash(password, salt);
+
+    await updateUser(user!.id, {
+      password: hashPassword,
+      randToken: generateToken(),
+    });
+
+    await updateOtp(otpRow!.id, {
+      otp: generateToken(),
+      verifyToken: generateToken(),
+    });
+
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+    });
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+    });
+
+    res.status(201).json({
+      message: "Password Changed Successfully",
+      data: {
+        userId: user!.id,
+      },
+    });
+  },
+];
