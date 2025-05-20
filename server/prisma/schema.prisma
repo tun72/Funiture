@@ -143,15 +143,19 @@ model ProductsOnOrder {
 }
 
 model Otp {
-  id Int @id @default(autoincrement())
-
-  otp   String
-  phone String @unique @db.VarChar(52)
-
+  id            Int      @id @default(autoincrement())
+  otp           String
+  phone         String   @unique @db.VarChar(52)
   rememberToken String
   verifyToken   String?
   count         Int      @default(0) @db.SmallInt
   error         Int      @default(0) @db.SmallInt
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+model Setting {
+  id    Int    @id @default(autoincrement())
+  key   String @unique @db.VarChar(50)
+  value String @db.VarChar(200)
 }

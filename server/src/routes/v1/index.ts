@@ -6,18 +6,34 @@ import userRoute from "./api";
 
 import { auth } from "../../middlewares/auth";
 import { authorise } from "../../middlewares/authorise";
+import { maintenance } from "../../middlewares/maintenance";
 
 const router = express.Router();
 // app.use("/api/v1", healthRoute);
-
-// auth
-router.use("/api/v1", authRoute);
 
 // admin
 router.use("/api/v1/admin", auth, authorise(true, "ADMIN"), adminRoute);
 
 // user
-router.use("/api/v1", userRoute);
+router.use("/api/v1/user", userRoute);
+
+// auth
+router.use("/api/v1", authRoute);
+
+// maintenance route
+// router.use(
+//   "/api/v1/admin",
+//   maintenance,
+//   auth,
+//   authorise(true, "ADMIN"),
+//   adminRoute
+// );
+
+// // user
+// router.use("/api/v1/user", maintenance, userRoute);
+
+// // auth
+// router.use("/api/v1", maintenance, authRoute);
 
 router.use(viewRoute);
 

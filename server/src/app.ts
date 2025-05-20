@@ -11,9 +11,14 @@ import middleware from "i18next-http-middleware";
 import path from "node:path";
 
 import routes from "./routes/v1/index";
+import cron from "node-cron";
 
 // controllers
 import * as errorController from "./controllers/web/errorController";
+import {
+  createOrUpdateSettingStatus,
+  getSettingStatus,
+} from "./services/settingService";
 
 export const app = express();
 
@@ -72,4 +77,13 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   const message = err.message || "Server Error";
   const errorCode = err.code || "Error_Code";
   res.status(status).json({ message, error: errorCode });
+});
+
+cron.schedule("*/2 * * * *", async () => {
+  console.log("running a taske every two minutes for testing purpose");
+  const setting = await getSettingStatus("maintenance");
+  if (setting!.value === "true") {
+    await createOrUpdateSettingStatus("maintenance", "false");
+    console.log("Now maintenance mode is off");
+  }
 });
