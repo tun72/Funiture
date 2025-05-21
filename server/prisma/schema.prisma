@@ -27,32 +27,33 @@ enum Status {
 }
 
 model Post {
-  id         Int      @id @default(autoincrement())
-  title      String   @db.VarChar(255)
+  id         Int       @id @default(autoincrement())
+  title      String    @db.VarChar(255)
   content    String
   body       String
   image      String
-  published  Boolean  @default(false)
+  published  Boolean   @default(false)
   authorId   Int
-  author     User     @relation(fields: [authorId], references: [id])
+  author     User      @relation(fields: [authorId], references: [id])
   categotyId Int
-  category   Category @relation(fields: [categotyId], references: [id])
+  category   Category  @relation(fields: [categotyId], references: [id])
   typeId     Int
-  type       Type     @relation(fields: [typeId], references: [id])
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  type       Type      @relation(fields: [typeId], references: [id])
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  tags       PostTag[]
 }
 
 model Category {
   id       Int       @id @default(autoincrement())
-  name     String    @db.VarChar(52)
+  name     String    @unique @db.VarChar(52)
   posts    Post[]
   products Product[]
 }
 
 model Type {
   id       Int       @id @default(autoincrement())
-  name     String    @db.VarChar(52)
+  name     String    @unique @db.VarChar(52)
   posts    Post[]
   products Product[]
 }
@@ -78,20 +79,32 @@ model User {
   @@map("users")
 }
 
-////////////// explicit relationship //////////////////////
-model Tag {
-  id       Int        @id @default(autoincrement())
-  name     String     @db.VarChar(52)
-  taggable Taggable[]
+model PostTag {
+  id    Int    @id @default(autoincrement())
+  name  String @unique @db.VarChar(52)
+  posts Post[]
 }
 
-model Taggable {
-  id     Int    @id @default(autoincrement())
-  tagId  Int
-  tag    Tag    @relation(fields: [tagId], references: [id])
-  typeId Int
-  type   String @db.VarChar(7)
+model ProductTag {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique @db.VarChar(52)
+  products Product[]
 }
+
+////////////// explicit relationship //////////////////////
+// model Tag {
+//   id       Int        @id @default(autoincrement())
+//   name     String     @db.VarChar(52)
+//   taggable Taggable[]
+// }
+
+// model Taggable {
+//   id     Int    @id @default(autoincrement())
+//   tagId  Int
+//   tag    Tag    @relation(fields: [tagId], references: [id])
+//   typeId Int
+//   type   String @db.VarChar(7)
+// }
 
 //////////////////////////////////////////////////////////
 
@@ -110,6 +123,7 @@ model Product {
   type        Type              @relation(fields: [typeId], references: [id])
   images      Image[]
   orders      ProductsOnOrder[]
+  tags        ProductTag[]
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 }
