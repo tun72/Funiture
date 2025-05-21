@@ -42,11 +42,13 @@ i18next
     fallbackLng: "en",
     preload: ["en", "mm"],
   });
+
 app.use(middleware.handle(i18next));
 
 app.set("view engine", "ejs");
 app.set("views", "src/views");
 app.use(express.static("public"));
+app.use(express.static("uploads"));
 
 let whitelist = ["http://example1.com", "http://localhost:5173"];
 const corsOptions = {
@@ -79,7 +81,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   res.status(status).json({ message, error: errorCode });
 });
 
-cron.schedule("*/2 * * * *", async () => {
+cron.schedule("* 5 * * *", async () => {
   console.log("running a taske every two minutes for testing purpose");
   const setting = await getSettingStatus("maintenance");
   if (setting!.value === "true") {
