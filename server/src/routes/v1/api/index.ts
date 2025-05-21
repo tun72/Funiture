@@ -10,6 +10,10 @@ import {
 } from "../../../controllers/api/profileController";
 import { auth } from "../../../middlewares/auth";
 import upload, { uploadMemory } from "../../../middlewares/uploadFile";
+import {
+  getPost,
+  getPostByPagination,
+} from "../../../controllers/api/postController";
 
 const router = express.Router();
 
@@ -21,7 +25,7 @@ router.patch("/profile/upload", auth, upload.single("avatar"), uploadProfile);
 router.patch(
   "/profile/upload/optimize",
   auth,
-  uploadMemory.single("avatar"),
+  upload.single("avatar"),
   uploadProfileOptimize
 );
 
@@ -34,6 +38,10 @@ router.patch(
 
 // testing
 router.get("/profile/myphoto/:photo", getMyPhoto);
+
+// post
+router.get("/posts", auth, getPostByPagination);
+router.get("/posts/:id", auth, getPost);
 
 // router.post()
 
