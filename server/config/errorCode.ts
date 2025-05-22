@@ -11,4 +11,5 @@ export const errorCode = {
   unauthorized: "Error_Unauthorized",
   wrongOtp: "Error_OptWrong",
   errorMaintenance: "Error_Maintenance",
+  notFound: "Error_NotFound",
 };
