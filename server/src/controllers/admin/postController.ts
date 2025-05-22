@@ -3,36 +3,94 @@ import { body, validationResult } from "express-validator";
 import { createError } from "../../utils/error";
 import { errorCode } from "../../../config/errorCode";
 import ImageQueue from "../../jobs/queues/imageQueue";
-import { createOnePost, PostArgs } from "../../services/postService";
+import {
+  createOnePost,
+  deleteOnePost,
+  getPostById,
+  PostArgs,
+  updateOnePost,
+} from "../../services/postService";
 import { checkUserIfNotExist } from "../../utils/auth";
 import path from "node:path";
 import { unlink } from "node:fs/promises";
+import sanitizeHtml from "sanitize-html";
+import { checkPhotoIfNotExist } from "../../utils/check";
 
 interface CustomRequest extends Request {
   userId?: number;
   user?: any;
 }
+
+const removeFile = async (
+  originalFile: string,
+  optimizedFile?: string | null
+) => {
+  try {
+    const originalfilePath = path.join(
+      __dirname,
+      "../../..",
+      "/uploads/images",
+      originalFile
+    );
+    await unlink(originalfilePath);
+
+    if (optimizedFile) {
+      const optimizefilePath = path.join(
+        __dirname,
+        "../../..",
+        "/uploads/optimize",
+        optimizedFile
+      );
+      await unlink(optimizefilePath);
+    }
+  } catch (e) {
+    // console.log(e);
+  }
+};
+
 export const createPost = [
   body("title", "Titile is required.").trim("").notEmpty().escape(),
   body("content", "Content is required.").trim("").notEmpty().escape(),
-  body("body", "Body is required").trim("").notEmpty().escape(),
+  body("body", "Body is required")
+    .trim("")
+    .notEmpty()
+    .customSanitizer((value) => sanitizeHtml(value))
+    .notEmpty(),
   body("category", "Category is required").trim("").notEmpty().escape(),
   body("type", "Type is required.").trim("").notEmpty().escape(),
   body("tags", "Tag is invalid")
     .optional({ nullable: true })
     .customSanitizer((value) => {
       if (value) {
-        return value.split(",").filter((tag: string) => tag.trim() !== "");
+        return value
+          .split(",")
+          .map((tag: string) => tag.trim())
+          .filter((tag: string) => tag !== "");
       }
     }),
   async (req: CustomRequest, res: Response, next: NextFunction) => {
     const errors = validationResult(req).array({ onlyFirstError: true });
     if (errors.length) {
-      // console.log(errors);
+      if (req.file) {
+        await removeFile(req.file.filename);
+      }
       return next(createError(errors[0].msg, 400, errorCode.invalid));
     }
+    const image = req.file;
+    checkPhotoIfNotExist(image);
     const user = req.user;
-    checkUserIfNotExist(user);
+    if (!user) {
+      if (req.file) {
+        await removeFile(req.file.filename);
+      }
+      return next(
+        createError(
+          "This account is not registered.",
+          401,
+          errorCode.unauthenticated
+        )
+      );
+    }
     const { title, content, body, category, type, tags } = req.body;
 
     const splitFileName = req.file?.filename.split(".")[0];
@@ -55,30 +113,6 @@ export const createPost = [
       }
     );
 
-    const deleteImage = async () => {
-      if (req.file?.filename) {
-        try {
-          const originalfilePath = path.join(
-            __dirname,
-            "../../..",
-            "/uploads/images",
-            req.file.filename
-          );
-          await unlink(originalfilePath);
-
-          const optimizefilePath = path.join(
-            __dirname,
-            "../../..",
-            "/uploads/optimize",
-            req.file.filename.split(".")[0] + ".webp"
-          );
-          await unlink(optimizefilePath);
-        } catch (e) {
-          console.log(e);
-        }
-      }
-    };
-
     let post;
     try {
       const data: PostArgs = {
@@ -94,7 +128,7 @@ export const createPost = [
 
       post = await createOnePost(data);
     } catch (err: any) {
-      await deleteImage();
+      await removeFile(req.file?.fieldname!);
       return next(createError(err.message, 500, errorCode.invalid));
     }
 
@@ -108,57 +142,173 @@ export const createPost = [
 ];
 
 export const updatePost = [
-  body("password", "Please provide a password.")
+  body("postId", "Post Id is required").trim("").notEmpty().isInt({ min: 1 }),
+  body("title", "Titile is required.").trim("").notEmpty().escape(),
+  body("content", "Content is required.").trim("").notEmpty().escape(),
+  body("body", "Body is required")
     .trim("")
     .notEmpty()
-    .isLength({ min: 8 })
-    .withMessage("Password must be minium of 8 characters."),
-
-  body("phone", "Invalid phone Number")
-    .trim("")
-    .notEmpty()
-    .matches(/^[0-9]+$/)
-    .isLength({ min: 5, max: 12 })
-    .withMessage("Phone number invalid."),
-  body("token", "Invalid token").trim("").notEmpty().escape(),
-
-  async (req: Request, res: Response, next: NextFunction) => {
+    .customSanitizer((value) => sanitizeHtml(value))
+    .notEmpty(),
+  body("category", "Category is required").trim("").notEmpty().escape(),
+  body("type", "Type is required.").trim("").notEmpty().escape(),
+  body("tags", "Tag is invalid")
+    .optional({ nullable: true })
+    .customSanitizer((value) => {
+      if (value) {
+        return value.split(",").filter((tag: string) => tag.trim() !== "");
+      }
+    }),
+  async (req: CustomRequest, res: Response, next: NextFunction) => {
     const errors = validationResult(req).array({ onlyFirstError: true });
     if (errors.length) {
-      // console.log(errors);
+      if (req.file) {
+        await removeFile(req.file.filename);
+      }
       return next(createError(errors[0].msg, 400, errorCode.invalid));
     }
+    const { postId, title, content, body, category, type, tags } = req.body;
+
+    console.log(req.file);
+
+    const image = req.file;
+
+    const user = req.user;
+    if (!user) {
+      if (req.file) {
+        await removeFile(req.file.filename);
+      }
+      return next(
+        createError(
+          "This account is not registered.",
+          401,
+          errorCode.unauthenticated
+        )
+      );
+    }
+
+    const post = await getPostById(+postId);
+
+    if (!post) {
+      await removeFile(req!.file!.filename);
+
+      return next(
+        createError("This post does not exist", 401, errorCode.invalid)
+      );
+    }
+
+    if (post.authorId !== user.id) {
+      await removeFile(req!.file!.filename);
+
+      return next(
+        createError(
+          "This postt does not belong to you.",
+          403,
+          errorCode.unauthorized
+        )
+      );
+    }
+
+    let data: any = {
+      title,
+      content,
+      body,
+      category,
+      tags,
+      type,
+    };
+
+    console.log(image);
+
+    if (image) {
+      data.image = image.filename;
+      await removeFile(post.image, post.image.split(".")[0] + ".webp");
+
+      await ImageQueue.add(
+        "optimize-image",
+        {
+          filePath: req.file?.path,
+          fileName: `${image.filename.split(".")[0]}.webp`,
+          width: 835,
+          height: 577,
+          quality: 100,
+        },
+        {
+          attempts: 3,
+          backoff: {
+            type: "exponential",
+            delay: 1000,
+          },
+        }
+      );
+    }
+
+    const updatePost = await updateOnePost(post.id, data);
 
     res.status(200).json({
-      message: "User account successfully created",
+      message: "Post update successfully",
+      data: {
+        updatePost,
+      },
     });
   },
 ];
 
 export const deletePost = [
-  body("password", "Please provide a password.")
-    .trim("")
-    .notEmpty()
-    .isLength({ min: 8 })
-    .withMessage("Password must be minium of 8 characters."),
-
-  body("phone", "Invalid phone Number")
-    .trim("")
-    .notEmpty()
-    .matches(/^[0-9]+$/)
-    .isLength({ min: 5, max: 12 })
-    .withMessage("Phone number invalid."),
-  body("token", "Invalid token").trim("").notEmpty().escape(),
-
-  async (req: Request, res: Response, next: NextFunction) => {
+  body("postId", "Post Id is required").trim("").notEmpty().isInt({ min: 1 }),
+  async (req: CustomRequest, res: Response, next: NextFunction) => {
     const errors = validationResult(req).array({ onlyFirstError: true });
     if (errors.length) {
-      // console.log(errors);
       return next(createError(errors[0].msg, 400, errorCode.invalid));
+    }
+    const { postId } = req.body;
+    const user = req.user;
+    if (!user) {
+      if (req.file) {
+        await removeFile(req.file.filename);
+      }
+      return next(
+        createError(
+          "This account is not registered.",
+          401,
+          errorCode.unauthenticated
+        )
+      );
+    }
+
+    const post = await getPostById(+postId);
+
+    if (!post) {
+      await removeFile(req!.file!.filename);
+
+      return next(
+        createError("This post does not exist", 401, errorCode.invalid)
+      );
+    }
+
+    if (post.authorId !== user.id) {
+      await removeFile(req!.file!.filename);
+
+      return next(
+        createError(
+          "This postt does not belong to you.",
+          403,
+          errorCode.unauthorized
+        )
+      );
+    }
+
+    const deletePost = await deleteOnePost(post.id);
+
+    if (deletePost) {
+      await removeFile(
+        deletePost.image,
+        deletePost.image.split(".")[0] + ".webp"
+      );
     }
 
     res.status(200).json({
-      message: "User account successfully created",
+      message: "Post delete successfully.",
     });
   },
 ];
