@@ -80,18 +80,18 @@ export const createPost = [
     const image = req.file;
     checkPhotoIfNotExist(image);
     const user = req.user;
-    if (!user) {
-      if (req.file) {
-        await removeFile(req.file.filename);
-      }
-      return next(
-        createError(
-          "This account is not registered.",
-          401,
-          errorCode.unauthenticated
-        )
-      );
-    }
+    // if (!user) {
+    //   if (req.file) {
+    //     await removeFile(req.file.filename);
+    //   }
+    //   return next(
+    //     createError(
+    //       "This account is not registered.",
+    //       401,
+    //       errorCode.unauthenticated
+    //     )
+    //   );
+    // }
     const { title, content, body, category, type, tags } = req.body;
 
     const splitFileName = req.file?.filename.split(".")[0];
@@ -186,18 +186,18 @@ export const updatePost = [
     const image = req.file;
 
     const user = req.user;
-    if (!user) {
-      if (req.file) {
-        await removeFile(req.file.filename);
-      }
-      return next(
-        createError(
-          "This account is not registered.",
-          401,
-          errorCode.unauthenticated
-        )
-      );
-    }
+    // if (!user) {
+    //   if (req.file) {
+    //     await removeFile(req.file.filename);
+    //   }
+    //   return next(
+    //     createError(
+    //       "This account is not registered.",
+    //       401,
+    //       errorCode.unauthenticated
+    //     )
+    //   );
+    // }
 
     const post = await getPostById(+postId);
 

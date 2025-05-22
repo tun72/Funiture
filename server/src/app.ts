@@ -78,6 +78,9 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   const status = err.status || 500;
   const message = err.message || "Server Error";
   const errorCode = err.code || "Error_Code";
+
+  console.log(err);
+
   res.status(status).json({ message, error: errorCode });
 });
 
