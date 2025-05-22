@@ -11,6 +11,7 @@ import {
 import { auth } from "../../../middlewares/auth";
 import upload, { uploadMemory } from "../../../middlewares/uploadFile";
 import {
+  getInfinitePostByPagination,
   getPost,
   getPostByPagination,
 } from "../../../controllers/api/postController";
@@ -40,7 +41,10 @@ router.patch(
 router.get("/profile/myphoto/:photo", getMyPhoto);
 
 // post
-router.get("/posts", auth, getPostByPagination);
+router.get("/posts/offset", auth, getPostByPagination); // offset Pagination
+
+router.get("/posts/cursor", auth, getInfinitePostByPagination); // Cursor-based pagination
+
 router.get("/posts/:id", auth, getPost);
 
 // router.post()

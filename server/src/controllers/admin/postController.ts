@@ -10,7 +10,7 @@ import {
   PostArgs,
   updateOnePost,
 } from "../../services/postService";
-import { checkUserIfNotExist } from "../../utils/auth";
+// import { checkUserIfNotExist } from "../../utils/auth";
 import path from "node:path";
 import { unlink } from "node:fs/promises";
 import sanitizeHtml from "sanitize-html";
