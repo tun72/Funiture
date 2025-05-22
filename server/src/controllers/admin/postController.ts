@@ -15,6 +15,7 @@ import path from "node:path";
 import { unlink } from "node:fs/promises";
 import sanitizeHtml from "sanitize-html";
 import { checkPhotoIfNotExist } from "../../utils/check";
+import cacheQueue from "../../jobs/queues/cacheQueue";
 
 interface CustomRequest extends Request {
   userId?: number;
@@ -127,6 +128,17 @@ export const createPost = [
       };
 
       post = await createOnePost(data);
+
+      await cacheQueue.add(
+        "invalidate-post-cache",
+        {
+          pattern: "posts:*", // delete all posts start with posts:*
+        },
+        {
+          jobId: `invlidate-${Date.now()}`,
+          priority: 1,
+        }
+      );
     } catch (err: any) {
       await removeFile(req.file?.fieldname!);
       return next(createError(err.message, 500, errorCode.invalid));
@@ -245,6 +257,17 @@ export const updatePost = [
 
     const updatePost = await updateOnePost(post.id, data);
 
+    await cacheQueue.add(
+      "invalidate-post-cache",
+      {
+        pattern: "posts:*", // delete all posts start with posts:*
+      },
+      {
+        jobId: `invlidate-${Date.now()}`,
+        priority: 1,
+      }
+    );
+
     res.status(200).json({
       message: "Post update successfully",
       data: {
@@ -299,6 +322,17 @@ export const deletePost = [
     }
 
     const deletePost = await deleteOnePost(post.id);
+
+    await cacheQueue.add(
+      "invalidate-post-cache",
+      {
+        pattern: "posts:*", // delete all posts start with posts:*
+      },
+      {
+        jobId: `invlidate-${Date.now()}`,
+        priority: 1,
+      }
+    );
 
     if (deletePost) {
       await removeFile(

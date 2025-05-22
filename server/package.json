@@ -7,7 +7,8 @@
     "dev": "nodemon src/index.ts",
     "build": "tsc -p .",
     "start": "node dist/src/index.js",
-    "work": "nodemon src/jobs/workers/imageWorker.ts"
+    "work": "nodemon src/jobs/workers/imageWorker.ts",
+    "cache": "nodemon src/jobs/workers/cacheWorker.ts"
   },
   "prettier": {
     "semi": true
