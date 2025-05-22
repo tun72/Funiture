@@ -1,12 +1,6 @@
 import { Queue } from "bullmq";
-import { Redis } from "ioredis";
-import "dotenv/config";
-const connection = new Redis({
-  host: process.env.REDIS_HOST,
-  port: parseInt(process.env.REDIS_PORT!),
-  //   password
-});
+import { redis } from "../../../config/redisClient";
 
-const ImageQueue = new Queue("imageOptimizeQueue", { connection });
+const ImageQueue = new Queue("imageOptimizeQueue", { connection: redis });
 
 export default ImageQueue;

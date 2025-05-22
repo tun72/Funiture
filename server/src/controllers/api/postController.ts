@@ -9,6 +9,7 @@ import {
 } from "../../services/postService";
 import { getUserById } from "../../services/authService";
 import { checkUserIfNotExist } from "../../utils/auth";
+import { getOrSetCache } from "../../utils/cache";
 
 interface CustomRequest extends Request {
   userId?: number;
@@ -25,7 +26,13 @@ export const getPost = [
     checkUserIfNotExist(user);
     const postId = req.params.id;
 
-    const post = await getPostWithRelations(+postId);
+    // const post = await ;
+
+    const key = `posts:${JSON.stringify(postId)}`;
+    const post = await getOrSetCache(key, async () => {
+      return getPostWithRelations(+postId);
+    });
+
     if (!post) {
       return next(createError("Post not found", 404, errorCode.notFound));
     }
@@ -34,7 +41,7 @@ export const getPost = [
       ...post,
       tags:
         post?.tags && post.tags.length > 0
-          ? post.tags.map((i) => i.name)
+          ? post.tags.map((i: any) => i.name)
           : null,
     };
 
@@ -85,8 +92,13 @@ export const getPostByPagination = [
         updatedAt: "desc",
       },
     };
+    const key = `posts:${JSON.stringify(req.query)}`;
 
-    const posts = await getPostsLists(options);
+    const posts = await getOrSetCache(key, async () => {
+      return getPostsLists(options);
+    });
+
+    // const posts = await getPostsLists(options);
 
     const hasNextPage = posts.length > +limit;
     let nextpage = null;
@@ -148,7 +160,11 @@ export const getInfinitePostByPagination = [
       },
     };
 
-    const posts = await getPostsLists(options);
+    const key = `posts:${JSON.stringify(req.query)}`;
+
+    const posts = await getOrSetCache(key, async () => {
+      return getPostsLists(options);
+    });
 
     const hasNextPage = posts.length > +limit;
 
