@@ -117,8 +117,8 @@ model Product {
   rating      Decimal           @default(0) @db.Decimal(10, 2)
   inventory   Int               @default(0) @db.SmallInt
   status      Status            @default(ACTIVE)
-  categotyId  Int
-  category    Category          @relation(fields: [categotyId], references: [id])
+  categoryId  Int
+  category    Category          @relation(fields: [categoryId], references: [id])
   typeId      Int
   type        Type              @relation(fields: [typeId], references: [id])
   images      Image[]
