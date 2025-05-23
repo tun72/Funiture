@@ -15,6 +15,10 @@ import {
   getPost,
   getPostByPagination,
 } from "../../../controllers/api/postController";
+import {
+  getProduct,
+  getProductsByPagination,
+} from "../../../controllers/api/productController";
 
 const router = express.Router();
 
@@ -48,5 +52,10 @@ router.get("/posts/cursor", auth, getInfinitePostByPagination); // Cursor-based 
 router.get("/posts/:id", auth, getPost);
 
 // router.post()
+
+// product
+router.get("/products/:id", auth, getProduct);
+
+router.get("/products", auth, getProductsByPagination); // Cursor-based pagination
 
 export default router;

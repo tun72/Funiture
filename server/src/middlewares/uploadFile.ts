@@ -23,7 +23,11 @@ const fileFilter = (
   file: Express.Multer.File,
   cb: FileFilterCallback
 ) => {
-  if (["image/jpg", "image/jpeg", "image/png"].includes(file.mimetype)) {
+  if (
+    ["image/jpg", "image/jpeg", "image/png", "image/webp"].includes(
+      file.mimetype
+    )
+  ) {
     cb(null, true);
   } else {
     cb(null, false);
