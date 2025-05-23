@@ -154,7 +154,7 @@ export const createPost = [
 ];
 
 export const updatePost = [
-  body("postId", "Post Id is required").trim("").notEmpty().isInt({ min: 1 }),
+  body("postId", "Post Id is required").isInt({ min: 1 }),
   body("title", "Titile is required.").trim("").notEmpty().escape(),
   body("content", "Content is required.").trim("").notEmpty().escape(),
   body("body", "Body is required")
@@ -302,16 +302,12 @@ export const deletePost = [
     const post = await getPostById(+postId);
 
     if (!post) {
-      await removeFile(req!.file!.filename);
-
       return next(
         createError("This post does not exist", 401, errorCode.invalid)
       );
     }
 
     if (post.authorId !== user.id) {
-      await removeFile(req!.file!.filename);
-
       return next(
         createError(
           "This postt does not belong to you.",
