@@ -48,3 +48,5 @@ const Title = ({ title, href, sideText }: { title: string, href: string, sideTex
     <Link to={href} className="text-muted-foreground font-semibold underline">{sideText}</Link>
   </div>
 )
+
+export const loader = async () => { }
