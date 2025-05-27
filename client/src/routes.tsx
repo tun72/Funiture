@@ -10,6 +10,7 @@ import Product from '@/pages/products/Product'
 import { Suspense } from 'react'
 import Login from '@/pages/auth/Login'
 import Register from '@/pages/auth/Register'
+import { homeLoader } from './router/loader'
 
 
 
@@ -19,7 +20,7 @@ export const router = createBrowserRouter([
         Component: RootLayout,
         errorElement: <Error />,
         children: [
-            { index: true, Component: Home },
+            { index: true, Component: Home, loader: homeLoader },
             { path: "about", Component: About },
             { path: "services", Component: Service },
             {
