@@ -9,7 +9,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { Link } from "react-router"
+import { Link, useActionData, useNavigation, useSubmit } from "react-router"
 import { z } from "zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form"
 import PasswordInput from "./Password-Input"
@@ -17,11 +17,19 @@ import PasswordInput from "./Password-Input"
 
 const loginSchema = z.object({
     phone: z.string().min(7, "Phone number is too short.").max(12, "Phone number is too long").regex(/^\d+$/, "Phone number must be numbers."),
-    password: z.string().min(8, "Password must be min of 8 characters."),
+    password: z.string().min(8, "P assword must be min of 8 characters."),
 
 })
 
 export default function LoginForm() {
+    const submit = useSubmit()
+    const navigation = useNavigation()
+    const actionData = useActionData() as {
+        error?: string,
+        message: string
+    }
+
+    const isSubmitting = navigation.state === "loading"
 
     const form = useForm<z.infer<typeof loginSchema>>({
         resolver: zodResolver(loginSchema),
@@ -32,8 +40,7 @@ export default function LoginForm() {
     })
 
     function onSubmit(values: z.infer<typeof loginSchema>) {
-
-
+        submit(values, { method: "POST", action: "/login" })
     }
     return (
         <Card className="w-full max-w-md p-4">
@@ -93,8 +100,12 @@ export default function LoginForm() {
                                         </FormItem>
                                     )}
                                 />
-                                <Button type="submit" className="w-full">
-                                    Login
+
+                                {
+                                    actionData && <p className="text-xs text-red-500">{actionData?.message}</p>
+                                }
+                                <Button type="submit" className="w-full" disabled={isSubmitting} >
+                                    {isSubmitting ? "Submitting ..." : "Login"}
                                 </Button>
                             </div>
                             <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
