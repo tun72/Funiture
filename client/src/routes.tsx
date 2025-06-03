@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router'
+import { createBrowserRouter, redirect } from 'react-router'
 import Home from '@/pages/Home'
 import RootLayout from '@/pages/RootLayout'
 import About from '@/pages/About'
@@ -9,8 +9,12 @@ import ProductDetail from '@/pages/products/ProductDetail'
 import Product from '@/pages/products/Product'
 import { Suspense } from 'react'
 import Login from '@/pages/auth/Login'
-import Register from '@/pages/auth/Register'
-import { homeLoader } from './router/loader'
+import { homeLoader, loginLoader } from './router/loader'
+import { loginAction, logoutAction, registerAction } from './router/action'
+import AuthRootLayout from './pages/auth/AuthRootLayout'
+import SignUpPage from './pages/auth/SignUpPage'
+import OtpPage from './pages/auth/Opt'
+import ConfirmPasswordPage from './pages/auth/ConfirmPassword'
 
 
 
@@ -68,11 +72,22 @@ export const router = createBrowserRouter([
     },
     {
         path: "/login",
-        Component: Login
+        Component: Login,
+        action: loginAction,
+        loader: loginLoader
     },
     {
         path: "/register",
-        Component: Register
-    }
-
+        Component: AuthRootLayout,
+        children: [
+            { index: true, Component: SignUpPage, loader: loginLoader, action: registerAction },
+            { path: "otp", Component: OtpPage },
+            { path: "confirm-password", Component: ConfirmPasswordPage }
+        ]
+    },
+    {
+        path: "/logout",
+        action: logoutAction,
+        loader: () => redirect("/")
+    },
 ])
