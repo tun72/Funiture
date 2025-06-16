@@ -9,8 +9,8 @@ import ProductDetail from '@/pages/products/ProductDetail'
 import Product from '@/pages/products/Product'
 import { Suspense } from 'react'
 import Login from '@/pages/auth/Login'
-import { homeLoader, loginLoader } from './router/loader'
-import { loginAction, logoutAction, registerAction } from './router/action'
+import { confirmLoader, homeLoader, loginLoader, otpLoader } from './router/loader'
+import { confirmAction, loginAction, logoutAction, otpAction, registerAction } from './router/action'
 import AuthRootLayout from './pages/auth/AuthRootLayout'
 import SignUpPage from './pages/auth/SignUpPage'
 import OtpPage from './pages/auth/Opt'
@@ -80,9 +80,9 @@ export const router = createBrowserRouter([
         path: "/register",
         Component: AuthRootLayout,
         children: [
-            { index: true, Component: SignUpPage, loader: loginLoader, action: registerAction },
-            { path: "otp", Component: OtpPage },
-            { path: "confirm-password", Component: ConfirmPasswordPage }
+            { Component: SignUpPage, loader: loginLoader, action: registerAction, index: true },
+            { path: "otp", Component: OtpPage, loader: otpLoader, action: otpAction },
+            { path: "confirm-password", Component: ConfirmPasswordPage, loader: confirmLoader, action: confirmAction }
         ]
     },
     {

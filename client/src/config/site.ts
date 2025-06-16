@@ -4,6 +4,8 @@ const links = {
   githubAccount: "https://github.com/sample",
   discord: "https://discord.com/users/sample",
 };
+
+export const imageUrl = import.meta.env.VITE_IMAGE_URL;
 export const siteConfig = {
   name: "Furniture Shop",
   description: "A Furniture Shopp build with react router.",

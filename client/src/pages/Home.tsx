@@ -1,12 +1,17 @@
-import { Link } from "react-router";
+import { Link, useLoaderData } from "react-router";
 import Couch from '@/data/images/couch.png'
 import { Button } from "@/components/ui/button";
 import CarouselCard from "@/components/products/CarouselCard";
-import { products } from "@/data/products";
+
 import BlogCard from "@/components/blogs/BlogCard";
 import { posts } from "@/data/posts";
 import ProductCard from "@/components/products/ProductCard";
+import { Product } from "@/types";
 export default function Home() {
+  const { productsData, postsData } = useLoaderData()
+
+
+
 
 
   return <div className="container mx-auto px-4 md:px-0">
@@ -31,13 +36,13 @@ export default function Home() {
     </div>
 
 
-    <CarouselCard products={products} />
+    <CarouselCard products={productsData.products} />
     <Title title="Feature Products" href="/products" sideText="view All Products" />
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {products.slice(0, 4).map((product) => (<ProductCard product={product} key={product.id} />))}
+      {productsData.products.slice(0, 4).map((product: Product) => (<ProductCard product={product} key={product.id} />))}
     </div>
     <Title title="Recent Blog" href="/blogs" sideText="view All Posts" />
-    <BlogCard posts={posts.slice(0, 3)} />
+    <BlogCard posts={postsData.posts} />
   </div>
 }
 

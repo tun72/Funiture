@@ -2,11 +2,7 @@ import { Response, Request, NextFunction } from "express";
 import { param, query, validationResult } from "express-validator";
 import { createError } from "../../utils/error";
 import { errorCode } from "../../../config/errorCode";
-import {
-  getPostById,
-  getPostsLists,
-  getPostWithRelations,
-} from "../../services/postService";
+
 import { getUserById } from "../../services/authService";
 import { checkUserIfNotExist } from "../../utils/auth";
 import { getOrSetCache } from "../../utils/cache";
@@ -51,9 +47,7 @@ export const getProduct = [
 
     res.status(200).json({
       message: "Post Detail",
-      data: {
-        product,
-      },
+      product,
     });
   },
 ];
@@ -64,7 +58,7 @@ export const getProductsByPagination = [
     .isInt({ gt: 0 })
     .optional(),
   query("limit", "Limit number must be unsigned integer.")
-    .isInt({ gt: 4 })
+    .isInt({ gt: 2 })
     .optional(),
   async (req: CustomRequest, res: Response, next: NextFunction) => {
     const errors = validationResult(req).array({ onlyFirstError: true });
@@ -115,6 +109,7 @@ export const getProductsByPagination = [
         name: true,
         price: true,
         discount: true,
+        description: true,
         status: true,
         images: {
           select: {
@@ -125,30 +120,30 @@ export const getProductsByPagination = [
         },
       },
       orderBy: {
-        id: "asc",
+        id: "desc",
       },
     };
 
     const key = `products:${JSON.stringify(req.query)}`;
 
-    const posts = await getOrSetCache(key, async () => {
+    const products = await getOrSetCache(key, async () => {
       return getProductsLists(options);
     });
 
-    const hasNextPage = posts.length > +limit;
+    const hasNextPage = products.length > +limit;
 
     if (hasNextPage) {
-      posts.pop();
+      products.pop();
     }
 
-    const newCursor = posts.length > 0 ? posts[posts.length - 1].id : null;
+    const nextCursor =
+      products.length > 0 ? products[products.length - 1].id : null;
     res.status(200).json({
       message: "Get All infinite posts",
-      data: {
-        posts,
-        hasNextPage,
-        newCursor,
-      },
+      products,
+      hasNextPage,
+      nextCursor,
+      prevCursor: lastCursor,
     });
   },
 ];

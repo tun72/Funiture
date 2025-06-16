@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form"
 
 import { z } from "zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form"
-import { Link } from "react-router"
+import { Link, useActionData, useNavigation, useSubmit } from "react-router"
 
 
 
@@ -19,6 +19,16 @@ const loginSchema = z.object({
 
 
 export default function SignUpForm() {
+
+    const submit = useSubmit()
+    const navigation = useNavigation()
+    const actionData = useActionData() as {
+        error?: string,
+        message: string
+    }
+
+
+    const isSubmitting = navigation.state === "submitting"
     const form = useForm<z.infer<typeof loginSchema>>({
         resolver: zodResolver(loginSchema),
         defaultValues: {
@@ -27,7 +37,7 @@ export default function SignUpForm() {
     })
 
     function onSubmit(values: z.infer<typeof loginSchema>) {
-        console.log("Form submitted with values:", values);
+        submit(values, { method: "POST", action: "." })
     }
     return (
         <div className="flex flex-col gap-6">
@@ -76,9 +86,12 @@ export default function SignUpForm() {
                                     </FormItem>
                                 )}
                             />
+                            {
+                                actionData && <p className="text-xs text-red-500">{actionData?.message}</p>
+                            }
                             <Button type="submit" className="w-full">
                                 <Icons.arrowRight className="mr-2 size-4" />
-                                Continue
+                                {isSubmitting ? "Submitting..." : "Continue"}
                             </Button>
                         </div>
                         <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">

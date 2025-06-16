@@ -60,7 +60,7 @@ export const getPostByPagination = [
     .isInt({ gt: 0 })
     .optional(),
   query("limit", "Limit number must be unsigned integer.")
-    .isInt({ gt: 4 })
+    .isInt({ gt: 2 })
     .optional(),
   async (req: CustomRequest, res: Response, next: NextFunction) => {
     const errors = validationResult(req).array({ onlyFirstError: true });
@@ -111,14 +111,10 @@ export const getPostByPagination = [
 
     res.status(200).json({
       message: "Post Detail",
-      data: {
-        posts,
-        currentPage: page,
-        nextPage: nextpage,
-        previousPage,
-
-        // post: modifiedPost,
-      },
+      posts,
+      currentPage: page,
+      nextPage: nextpage,
+      previousPage,
     });
   },
 ];
@@ -129,7 +125,7 @@ export const getInfinitePostByPagination = [
     .isInt({ gt: 0 })
     .optional(),
   query("limit", "Limit number must be unsigned integer.")
-    .isInt({ gt: 4 })
+    .isInt({ gt: 2 })
     .optional(),
   async (req: CustomRequest, res: Response, next: NextFunction) => {
     const errors = validationResult(req).array({ onlyFirstError: true });
@@ -156,7 +152,7 @@ export const getInfinitePostByPagination = [
         },
       },
       orderBy: {
-        id: "asc",
+        id: "desc",
       },
     };
 
@@ -172,14 +168,13 @@ export const getInfinitePostByPagination = [
       posts.pop();
     }
 
-    const newCursor = posts.length > 0 ? posts[posts.length - 1].id : null;
+    const nextCursor = posts.length > 0 ? posts[posts.length - 1].id : null;
     res.status(200).json({
       message: "Get All infinite posts",
-      data: {
-        posts,
-        hasNextPage,
-        newCursor,
-      },
+      posts,
+      hasNextPage,
+      nextCursor,
+      prevCursor: lastCursor,
     });
   },
 ];

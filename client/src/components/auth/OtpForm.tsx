@@ -39,7 +39,7 @@ export default function OtpForm() {
         message: string
     }
 
-    const isSubmitting = navigation.state === "loading"
+    const isSubmitting = navigation.state === "submitting"
 
 
     const form = useForm<z.infer<typeof FormSchema>>({
@@ -50,7 +50,7 @@ export default function OtpForm() {
     })
 
     function onSubmit(data: z.infer<typeof FormSchema>) {
-        submit(data, { method: "POST", action: "/otp" })
+        submit(data, { method: "POST", action: "/register/otp" })
     }
 
     return (
