@@ -8,8 +8,9 @@ import { useForm } from "react-hook-form"
 
 import { z } from "zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form"
-import { Link } from "react-router"
+import { Link, useActionData, useNavigation, useSubmit } from "react-router"
 import PasswordInput from "./Password-Input"
+import { useState } from "react"
 
 
 
@@ -20,6 +21,19 @@ const loginSchema = z.object({
 
 
 export default function ConfirmPasswordForm() {
+
+    const submit = useSubmit()
+    const navigation = useNavigation()
+    const actionData = useActionData() as {
+        error?: string,
+        message: string
+    }
+
+
+    const isSubmitting = navigation.state === "submitting"
+
+    const [clientError, setClientError] = useState<string | null>(null)
+
     const form = useForm<z.infer<typeof loginSchema>>({
         resolver: zodResolver(loginSchema),
         defaultValues: {
@@ -28,8 +42,14 @@ export default function ConfirmPasswordForm() {
         }
     })
 
-    function onSubmit(values: z.infer<typeof loginSchema>) {
-        console.log("Form submitted with values:", values);
+    function onSubmit(data: z.infer<typeof loginSchema>) {
+        if (data.confirmPassword !== data.password) {
+            setClientError("Passwords do not match.")
+            return;
+        }
+        console.log("hit");
+
+        submit(data, { method: "POST", action: "/register/confirm-password" })
     }
     return (
         <div className="flex flex-col gap-6">
@@ -87,8 +107,19 @@ export default function ConfirmPasswordForm() {
                                 )}
                             />
 
+
+                            {
+                                actionData && <div className="flex gap-1 items-center text-red-500">
+                                    <p className="text-sm ">{actionData?.message}</p>
+                                    <Link to="/register" className="text-sm underline underline-offset-4 cursor-pointer">
+                                        go back to register
+                                    </Link>
+                                </div>
+                            }
+
+                            {clientError && (<p className="text-xs text-red-500">{clientError}</p>)}
                             <Button type="submit" className="w-full">
-                                Confirm
+                                {isSubmitting ? "Submitting..." : "Confirm"}
                             </Button>
                         </div>
                     </div>

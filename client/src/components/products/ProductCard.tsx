@@ -12,6 +12,7 @@ import { Link } from "react-router"
 import { AspectRatio } from "../ui/aspect-ratio"
 import { Icons } from "../icons"
 import { cn, formatPrice } from "@/lib/utils"
+import { imageUrl } from "@/config/site"
 
 interface ProductProps extends React.HTMLAttributes<HTMLDivElement> {
     product: Product,
@@ -24,9 +25,10 @@ function ProductCard({ product, className }: ProductProps) {
                 <div className="border-b p-0">
                     <AspectRatio ratio={1 / 1} className="bg-muted">
                         <img
-                            src={product.images[0]}
+                            src={imageUrl + product.images[0].path}
                             alt={product.name}
-                            className="size-full object-cover"
+                            decoding="async"
+                            className="size-full object-contain"
                             loading="lazy"
                         />
                     </AspectRatio>

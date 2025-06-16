@@ -29,7 +29,7 @@ export default function LoginForm() {
         message: string
     }
 
-    const isSubmitting = navigation.state === "loading"
+    const isSubmitting = navigation.state === "submitting"
 
     const form = useForm<z.infer<typeof loginSchema>>({
         resolver: zodResolver(loginSchema),

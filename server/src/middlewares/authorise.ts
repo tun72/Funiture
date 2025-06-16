@@ -12,7 +12,7 @@ export const authorise =
   (permission: boolean, ...roles: string[]) =>
   async (req: CustomRequest, res: Response, next: NextFunction) => {
     const userId = req.userId;
-    const user = await getUserById(userId!);
+    const user = await getUserById(userId!); 
     if (!user) {
       const error: any = new Error(req.t("accNotRegister"));
       error.status = 401;

@@ -51,6 +51,8 @@ router.get("/posts/cursor", auth, getInfinitePostByPagination); // Cursor-based 
 
 router.get("/posts/:id", auth, getPost);
 
+router.get("/posts", auth, getInfinitePostByPagination); // Cursor-based pagination
+
 // router.post()
 
 // product

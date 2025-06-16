@@ -50,6 +50,11 @@ app.set("views", "src/views");
 app.use(express.static("public"));
 app.use(express.static("uploads"));
 
+app.use((req, res, next) => {
+  res.setHeader("Cross-Origin-Resource-Ploicy", "same-site");
+  next();
+});
+
 let whitelist = ["http://example1.com", "http://localhost:5173"];
 const corsOptions = {
   origin: function (
