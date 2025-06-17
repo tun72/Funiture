@@ -24,7 +24,11 @@ export const router = createBrowserRouter([
         Component: RootLayout,
         errorElement: <Error />,
         children: [
-            { index: true, Component: Home, loader: homeLoader },
+            {
+                index: true,
+                Component: Home,
+                loader: homeLoader
+            },
             { path: "about", Component: About },
             { path: "services", Component: Service },
             {

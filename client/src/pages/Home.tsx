@@ -1,18 +1,52 @@
-import { Link, useLoaderData } from "react-router";
+import { Link } from "react-router";
 import Couch from '@/data/images/couch.png'
 import { Button } from "@/components/ui/button";
 import CarouselCard from "@/components/products/CarouselCard";
 
 import BlogCard from "@/components/blogs/BlogCard";
-import { posts } from "@/data/posts";
+// import { posts } from "@/data/posts";
 import ProductCard from "@/components/products/ProductCard";
 import { Product } from "@/types";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { postQuery, productQuery } from "@/api/query";
 export default function Home() {
-  const { productsData, postsData } = useLoaderData()
+  // loader
+  // v1
+  // const { productsData, postsData } = useLoaderData()
 
+  // v2
+  // const {
+  //   data: productsData,
+  //   isLoading: isLoadingProducts,
+  //   isError: isErrorProducts,
+  //   error: productsError,
+  //   refetch: productRefetch } = useQuery(productQuery("?limit=8"));
 
+  // const {
+  //   data: postsData,
+  //   isLoading: isLoadingPosts,
+  //   isError: isErrorPosts, error:
+  //   postsError, refetch: postRefetch } = useQuery(postQuery("?limit=3"))
 
+  // if (isLoadingProducts && isLoadingPosts) {
+  //   return (<p className="text-center">Loading...</p>)
+  // }
 
+  // if (isErrorProducts && isErrorPosts) {
+  //   return (<div className="text-center text-red-400">
+  //     <p className="mb-4">{productsError.message} & {postsError.message}</p>
+  //     <Button variant={"secondary"} onClick={() => {
+  //       productRefetch()
+  //       postRefetch()
+  //     }}>
+  //       Retry
+  //     </Button>
+  //   </div>)
+  // }
+
+  // v3
+  const { data: productsData } = useSuspenseQuery(productQuery("?limit=8"))
+  const { data: postsData } = useSuspenseQuery(postQuery("?limit=3"))
 
   return <div className="container mx-auto px-4 md:px-0">
     <div className="flex flex-col lg:flex-row justify-between">
@@ -36,13 +70,13 @@ export default function Home() {
     </div>
 
 
-    <CarouselCard products={productsData.products} />
+    {productsData && <CarouselCard products={productsData.products} />}
     <Title title="Feature Products" href="/products" sideText="view All Products" />
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {productsData.products.slice(0, 4).map((product: Product) => (<ProductCard product={product} key={product.id} />))}
+      {productsData && productsData.products.slice(0, 4).map((product: Product) => (<ProductCard product={product} key={product.id} />))}
     </div>
     <Title title="Recent Blog" href="/blogs" sideText="view All Posts" />
-    <BlogCard posts={postsData.posts} />
+    {postsData && <BlogCard posts={postsData.posts} />}
   </div>
 }
 
@@ -53,5 +87,3 @@ const Title = ({ title, href, sideText }: { title: string, href: string, sideTex
     <Link to={href} className="text-muted-foreground font-semibold underline">{sideText}</Link>
   </div>
 )
-
-export const loader = async () => { }

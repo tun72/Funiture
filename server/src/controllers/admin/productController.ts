@@ -13,6 +13,7 @@ import cacheQueue from "../../jobs/queues/cacheQueue";
 import {
   createOneProduct,
   deleteOneProduct,
+  getDeleteProductById,
   getProductById,
   updateOneProduct,
 } from "../../services/productService";
@@ -50,7 +51,7 @@ const removeFile = async (
       }
     }
   } catch (e) {
-    // console.log(e);
+    console.log(e);
   }
 };
 
@@ -129,6 +130,9 @@ export const createProduct = [
     const originalFileNames = req.files.map((file: any) => {
       return { path: file.filename };
     });
+
+    console.log(originalFileNames);
+
     try {
       const data: any = {
         name,
@@ -303,9 +307,7 @@ export const deleteProduct = [
     }
     const { productId } = req.body;
 
-    const product = await getProductById(+productId);
-
-    console.log(product);
+    const product = await getDeleteProductById(+productId);
 
     if (!product) {
       return next(
@@ -331,6 +333,7 @@ export const deleteProduct = [
       const optimizeFiles = originalFiles.map(
         (image) => image.split(".")[0] + ".webp"
       );
+
       await removeFile(originalFiles, optimizeFiles);
     }
 

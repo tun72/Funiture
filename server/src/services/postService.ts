@@ -1,4 +1,5 @@
 import { prisma } from "./prismaClient";
+import { PrismaClient } from "../../generated/prisma";
 
 // create
 export type PostArgs = {
@@ -151,4 +152,11 @@ export const getPostsLists = async (options: any) => {
   console.log(options);
 
   return prisma.post.findMany(options);
+};
+
+export const getDeletedPostById = async (id: number) => {
+  const prisma = new PrismaClient();
+  return prisma.post.findUnique({
+    where: { id },
+  });
 };
