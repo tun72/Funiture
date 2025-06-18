@@ -47,9 +47,7 @@ export const getPost = [
 
     res.status(200).json({
       message: "Post Detail",
-      data: {
-        post: modifiedPost,
-      },
+      post: modifiedPost,
     });
   },
 ];
@@ -121,7 +119,7 @@ export const getPostByPagination = [
 
 // cursor based pagination
 export const getInfinitePostByPagination = [
-  query("lastCursor", "lastCursor must be unsigned integer.")
+  query("cursor", "lastCursor must be unsigned integer.")
     .isInt({ gt: 0 })
     .optional(),
   query("limit", "Limit number must be unsigned integer.")
@@ -132,7 +130,7 @@ export const getInfinitePostByPagination = [
     if (errors.length) {
       return next(createError(errors[0].msg, 400, errorCode.invalid));
     }
-    const lastCursor = req.query.lastCursor;
+    const lastCursor = req.query.cursor;
     const limit = req.query.limit || 5;
 
     const options = {
@@ -174,7 +172,7 @@ export const getInfinitePostByPagination = [
       posts,
       hasNextPage,
       nextCursor,
-      prevCursor: lastCursor,
+      prevCursor: Number(lastCursor),
     });
   },
 ];

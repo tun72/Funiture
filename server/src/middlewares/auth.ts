@@ -37,6 +37,8 @@ export const auth = (req: CustomRequest, res: Response, next: NextFunction) => {
         id: number;
         phone: string;
       };
+
+      console.log(decoded);
     } catch (e) {
       console.log(e);
       const error: any = new Error("You are not an authenticated user.");

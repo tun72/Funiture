@@ -10,7 +10,6 @@ import {
   getProductsLists,
   getProductWithRelations,
 } from "../../services/productService";
-import { disconnect } from "node:process";
 
 interface CustomRequest extends Request {
   userId?: number;
@@ -52,7 +51,7 @@ export const getProduct = [
   },
 ];
 
-// // cursor based pagination
+// cursor based pagination
 export const getProductsByPagination = [
   query("cursor", "cursor must be unsigned integer.")
     .isInt({ gt: 0 })

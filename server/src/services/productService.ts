@@ -1,7 +1,8 @@
 import { prisma } from "./prismaClient";
+import { PrismaClient } from "../../generated/prisma";
 
 export const createOneProduct = async (data: any) => {
-  const productData: any = {
+  const productdata: any = {
     name: data.name,
     description: data.description,
     price: data.price,
@@ -28,8 +29,8 @@ export const createOneProduct = async (data: any) => {
     },
   };
 
-  if (data.tags && data.tags.length !== 0) {
-    productData.tags = {
+  if (data.tags && data.tags.length > 0) {
+    productdata.tags = {
       connectOrCreate: data.tags.map((tagName: string) => ({
         where: { name: tagName },
         create: {
@@ -38,17 +39,20 @@ export const createOneProduct = async (data: any) => {
       })),
     };
   }
+  return prisma.product.create({ data: productdata });
+};
 
-  console.log(productData);
-
-  return prisma.product.create({
-    data: productData,
+export const getProductById = async (id: number) => {
+  return prisma.product.findUnique({
+    where: { id },
+    include: {
+      images: true,
+    },
   });
 };
 
-// update
 export const updateOneProduct = async (productId: number, data: any) => {
-  const productData: any = {
+  const productdata: any = {
     name: data.name,
     description: data.description,
     price: data.price,
@@ -71,8 +75,9 @@ export const updateOneProduct = async (productId: number, data: any) => {
       },
     },
   };
-  if (data.tags && data.tags.length !== 0) {
-    productData.tags = {
+
+  if (data.tags && data.tags.length > 0) {
+    productdata.tags = {
       set: [],
       connectOrCreate: data.tags.map((tagName: string) => ({
         where: { name: tagName },
@@ -81,68 +86,37 @@ export const updateOneProduct = async (productId: number, data: any) => {
         },
       })),
     };
-  } else {
-    productData.tags = {
-      set: [],
-    };
   }
 
   if (data.images && data.images.length > 0) {
-    productData.images = {
+    productdata.images = {
       deleteMany: {},
       create: data.images,
     };
   }
 
-  console.log(productData);
-
   return prisma.product.update({
     where: { id: productId },
-    data: productData,
+    data: productdata,
   });
 };
 
-// delete
 export const deleteOneProduct = async (id: number) => {
   return prisma.product.delete({
     where: { id },
   });
 };
 
-// get
-export const getProductById = async (id: number) => {
-  return prisma.product.findUnique({
-    where: { id },
-    include: {
-      images: true,
-    },
-  });
-};
-
 export const getProductWithRelations = async (id: number) => {
   return prisma.product.findUnique({
     where: { id },
-    select: {
-      id: true,
-      description: true,
-      name: true,
-      price: true,
-      discount: true,
-      inventory: true,
-      status: true,
-      category: {
-        select: {
-          name: true,
-        },
-      },
-      type: {
-        select: {
-          name: true,
-        },
-      },
-      tags: {
-        select: { name: true },
-      },
+    omit: {
+      categoryId: true,
+      typeId: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+    include: {
       images: {
         select: {
           id: true,
@@ -150,10 +124,27 @@ export const getProductWithRelations = async (id: number) => {
         },
       },
     },
-    // omit: { createdAt: true },
   });
 };
 
 export const getProductsLists = async (options: any) => {
   return prisma.product.findMany(options);
+};
+
+export const getCategoryList = async () => {
+  return prisma.category.findMany();
+};
+
+export const getTypeList = async () => {
+  return prisma.type.findMany();
+};
+
+export const getDeleteProductById = async (id: number) => {
+  const prisma = new PrismaClient();
+  return prisma.product.findUnique({
+    where: { id },
+    include: {
+      images: true,
+    },
+  });
 };

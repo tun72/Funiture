@@ -9,7 +9,7 @@ import ProductDetail from '@/pages/products/ProductDetail'
 import Product from '@/pages/products/Product'
 import { Suspense } from 'react'
 import Login from '@/pages/auth/Login'
-import { confirmLoader, homeLoader, loginLoader, otpLoader } from './router/loader'
+import { blogInfiniteLoader, confirmLoader, homeLoader, loginLoader, otpLoader, postLoader } from './router/loader'
 import { confirmAction, loginAction, logoutAction, otpAction, registerAction } from './router/action'
 import AuthRootLayout from './pages/auth/AuthRootLayout'
 import SignUpPage from './pages/auth/SignUpPage'
@@ -24,7 +24,11 @@ export const router = createBrowserRouter([
         Component: RootLayout,
         errorElement: <Error />,
         children: [
-            { index: true, Component: Home, loader: homeLoader },
+            {
+                index: true,
+                Component: Home,
+                loader: homeLoader
+            },
             { path: "about", Component: About },
             { path: "services", Component: Service },
             {
@@ -49,13 +53,13 @@ export const router = createBrowserRouter([
                         index: true,
                         lazy: async () => {
                             const { default: Blog } = await import("@/pages/blogs/Blog")
-                            return { Component: Blog }
+                            return { Component: Blog, loader: blogInfiniteLoader }
                         }
                     },
                     {
                         path: ":postId", lazy: async () => {
                             const { default: Blog } = await import('@/pages/blogs/BlogDetail')
-                            return { Component: Blog }
+                            return { Component: Blog, loader: postLoader }
                         }
                     },
                 ],

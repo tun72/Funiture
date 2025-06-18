@@ -125,16 +125,26 @@
 
 @theme {
   --animate-caret-blink: caret-blink 1.25 ease-out infinite;
-}
-
-@keyframes caret-blink {
-  0%,
-  70%,
-  100% {
-    opacity: 1;
+  @keyframes caret-blink {
+    0%,
+    70%,
+    100% {
+      opacity: 1;
+    }
+    20%,
+    50% {
+      opacity: 0;
+    }
   }
-  20%,
-  50% {
-    opacity: 0;
+}
+@theme {
+  --animate-progress: animate-progress 2s linear infinite;
+  @keyframes animate-progress {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(200%);
+    }
   }
 }

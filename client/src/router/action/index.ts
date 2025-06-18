@@ -33,6 +33,8 @@ export const loginAction = async ({ request }: ActionFunctionArgs) => {
 export const logoutAction = async () => {
   try {
     await api.post("logout");
+    console.log("hit");
+
     return redirect("/login");
   } catch (error) {
     console.log("logout failed!", error);

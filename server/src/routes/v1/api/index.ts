@@ -19,6 +19,7 @@ import {
   getProduct,
   getProductsByPagination,
 } from "../../../controllers/api/productController";
+import { getCategotyAndType } from "../../../controllers/api/categoryTypeController";
 
 const router = express.Router();
 
@@ -59,5 +60,7 @@ router.get("/posts", auth, getInfinitePostByPagination); // Cursor-based paginat
 router.get("/products/:id", auth, getProduct);
 
 router.get("/products", auth, getProductsByPagination); // Cursor-based pagination
+
+router.get("/filter-type", auth, getCategotyAndType);
 
 export default router;

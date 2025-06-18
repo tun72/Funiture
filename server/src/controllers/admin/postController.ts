@@ -6,6 +6,7 @@ import ImageQueue from "../../jobs/queues/imageQueue";
 import {
   createOnePost,
   deleteOnePost,
+  getDeletedPostById,
   getPostById,
   PostArgs,
   updateOnePost,
@@ -45,7 +46,7 @@ const removeFile = async (
       await unlink(optimizefilePath);
     }
   } catch (e) {
-    // console.log(e);
+    console.log(e);
   }
 };
 
@@ -287,9 +288,6 @@ export const deletePost = [
     const { postId } = req.body;
     const user = req.user;
     if (!user) {
-      if (req.file) {
-        await removeFile(req.file.filename);
-      }
       return next(
         createError(
           "This account is not registered.",
@@ -299,7 +297,7 @@ export const deletePost = [
       );
     }
 
-    const post = await getPostById(+postId);
+    const post = await getDeletedPostById(+postId);
 
     if (!post) {
       return next(
@@ -331,10 +329,7 @@ export const deletePost = [
     );
 
     if (deletePost) {
-      await removeFile(
-        deletePost.image,
-        deletePost.image.split(".")[0] + ".webp"
-      );
+      await removeFile(post.image, post.image.split(".")[0] + ".webp");
     }
 
     res.status(200).json({
