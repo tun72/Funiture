@@ -75,6 +75,7 @@ model User {
   updatedAt       DateTime  @updatedAt
   posts           Post[]
   orders          Order[]
+  favourites      Product[]
 
   @@map("users")
 }
@@ -124,6 +125,7 @@ model Product {
   images      Image[]
   orders      ProductsOnOrder[]
   tags        ProductTag[]
+  users       User[]
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 }

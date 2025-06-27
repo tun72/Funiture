@@ -1,5 +1,5 @@
 import { Response, Request, NextFunction } from "express";
-import { param, query, validationResult } from "express-validator";
+import { body, param, query, validationResult } from "express-validator";
 import { createError } from "../../utils/error";
 import { errorCode } from "../../../config/errorCode";
 
@@ -10,6 +10,11 @@ import {
   getProductsLists,
   getProductWithRelations,
 } from "../../services/productService";
+import {
+  addFavouriteProducts,
+  removeFavouriteProducts,
+} from "../../services/userService";
+import cacheQueue from "../../jobs/queues/cacheQueue";
 
 interface CustomRequest extends Request {
   userId?: number;
@@ -57,7 +62,7 @@ export const getProductsByPagination = [
     .isInt({ gt: 0 })
     .optional(),
   query("limit", "Limit number must be unsigned integer.")
-    .isInt({ gt: 2 })
+    .isInt({ gt: 3 })
     .optional(),
   async (req: CustomRequest, res: Response, next: NextFunction) => {
     const errors = validationResult(req).array({ onlyFirstError: true });
@@ -68,6 +73,8 @@ export const getProductsByPagination = [
     const limit = req.query.limit || 5;
     const category = req.query.category;
     const type = req.query.type;
+
+    console.log(limit);
 
     const userId = req.userId;
     checkUserIfNotExist(userId);
@@ -143,6 +150,46 @@ export const getProductsByPagination = [
       hasNextPage,
       nextCursor,
       prevCursor: lastCursor,
+    });
+  },
+];
+
+export const toggleFavouriteProduct = [
+  body("productId", "Product Id is required").isInt({ min: 1 }),
+  body("favourite", "Favourite is required").isBoolean(),
+  async (req: CustomRequest, res: Response, next: NextFunction) => {
+    const errors = validationResult(req).array({ onlyFirstError: true });
+    if (errors.length) {
+      return next(createError(errors[0].msg, 400, errorCode.invalid));
+    }
+
+    const userId = req.userId;
+    const user = await getUserById(userId!);
+    checkUserIfNotExist(user);
+
+    const { productId, favourite } = req.body;
+
+    if (favourite) {
+      await addFavouriteProducts(+productId, user!.id);
+    } else {
+      await removeFavouriteProducts(+productId, user!.id);
+    }
+
+    await cacheQueue.add(
+      "invalidate-product-cache",
+      {
+        pattern: "products:*",
+      },
+      {
+        jobId: `invalidate-${Date.now()}`,
+        priority: 1,
+      }
+    );
+
+    res.status(200).json({
+      message: favourite
+        ? "Successfully added favourite"
+        : "Successfully removed favourite",
     });
   },
 ];

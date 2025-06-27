@@ -18,6 +18,7 @@ import {
 import {
   getProduct,
   getProductsByPagination,
+  toggleFavouriteProduct,
 } from "../../../controllers/api/productController";
 import { getCategotyAndType } from "../../../controllers/api/categoryTypeController";
 
@@ -63,4 +64,5 @@ router.get("/products", auth, getProductsByPagination); // Cursor-based paginati
 
 router.get("/filter-type", auth, getCategotyAndType);
 
+router.patch("/products/toggle-favourite", auth, toggleFavouriteProduct);
 export default router;

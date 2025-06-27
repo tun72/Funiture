@@ -18,7 +18,7 @@ function Blog() {
         // hasPreviousPage 
     } = useInfiniteQuery(postInfiniteQuery())
 
-    console.log(hasNextPage);
+    // console.log(hasNextPage);
 
 
 

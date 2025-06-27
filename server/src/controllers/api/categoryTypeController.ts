@@ -23,7 +23,7 @@ export const getCategotyAndType = async (
   const type = await getAllTypes();
   res.status(200).json({
     message: "Get All infinite posts",
-    category,
-    type,
+    categories: category,
+    types: type,
   });
 };

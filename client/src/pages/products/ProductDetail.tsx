@@ -1,3 +1,4 @@
+import { oneProductQuery, productQuery } from "@/api/query"
 import { Icons } from "@/components/icons"
 import AddToCartForm from "@/components/products/AddToCartForm"
 import AddToFavourite from "@/components/products/AddToFavourite"
@@ -9,19 +10,29 @@ import { Button } from "@/components/ui/button"
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
-import { products } from "@/data/products"
+import { imageUrl } from "@/config/site"
 import { formatPrice } from "@/lib/utils"
+import { Product } from "@/types"
+import { useSuspenseQuery } from "@tanstack/react-query"
 import Autoplay from "embla-carousel-autoplay"
-import { Link, useParams } from "react-router"
+import { useLoaderData, useNavigate } from "react-router"
 
 function ProductDetail() {
-    const { productId } = useParams()
-    const product = products.find((product) => product.id === productId)
+    const { productId } = useLoaderData()
+    // const post = posts.find((post) => post.id === postId)
+    const navigate = useNavigate()
+
+    const { data: productsData } = useSuspenseQuery(productQuery("?limit=4"))
+    const { data: productDetail } = useSuspenseQuery(oneProductQuery(productId));
+
+    const product: Product = productDetail.product
+    const products: Product[] = productsData.products
+
+
     return (
         <>
-            <Button asChild variant={"outline"} className="mt-8">
-                <Link to={"/products"}>
-                    <Icons.arrowLeft /> All Products </Link>
+            <Button variant={"outline"} className="mt-8" onClick={() => navigate(-1)}>
+                <Icons.arrowLeft /> All Products
             </Button>
 
             <section className="flex flex-col md:flex-row gap-8 md:gap-16 my-6">
@@ -39,7 +50,7 @@ function ProductDetail() {
                                 {product?.images.map((image, index) => (
                                     <CarouselItem key={index}>
                                         <div className="p-1">
-                                            <img src={image} alt={"Product Image " + index} className="size-full rounded-md object-cover" />
+                                            <img src={`${imageUrl}${image.path}`} alt={"Product Image " + index} className="size-full rounded-md object-cover" />
                                         </div>
                                     </CarouselItem>
                                 ))}
@@ -57,10 +68,10 @@ function ProductDetail() {
 
                             <div className="flex items-center justify-between">
                                 <Rating rating={product.rating} />
-                                <AddToFavourite id={product.id} rating={product.rating} className="cursor-pointer" />
+                                <AddToFavourite id={String(product.id)} rating={product.rating} className="cursor-pointer" />
                             </div>
 
-                            <AddToCartForm canBuy={product.status === "active"} />
+                            <AddToCartForm canBuy={product.status === "ACTIVE"} />
                             <Separator className="my-1.5" />
 
                             <Accordion type="single" collapsible className="w-full">

@@ -1,8 +1,11 @@
 import { authApi } from "@/api";
 import {
+  categoryTypeQuery,
   onePostQuery,
+  oneProductQuery,
   postInfiniteQuery,
   postQuery,
+  productInfiniteQuery,
   productQuery,
   queryClient,
 } from "@/api/query";
@@ -80,4 +83,23 @@ export const postLoader = async ({ params }: LoaderFunctionArgs) => {
   // await queryClient
 
   return { postId: params.postId };
+};
+
+export const productInfiniteLoader = async () => {
+  await queryClient.ensureQueryData(categoryTypeQuery());
+  await queryClient.prefetchInfiniteQuery(productInfiniteQuery());
+  return null;
+};
+
+export const productLoader = async ({ params }: LoaderFunctionArgs) => {
+  if (!params.productId) {
+    throw new Error("No Product ID provided.");
+  }
+  console.log("hit", params.productId);
+
+  await queryClient.ensureQueryData(productQuery("?limit=4"));
+  await queryClient.ensureQueryData(oneProductQuery(Number(params.productId)));
+  // await queryClient
+
+  return { productId: params.productId };
 };
