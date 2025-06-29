@@ -10,7 +10,7 @@ import Product from '@/pages/products/Product'
 import { Suspense } from 'react'
 import Login from '@/pages/auth/Login'
 import { blogInfiniteLoader, confirmLoader, homeLoader, loginLoader, otpLoader, postLoader, productLoader } from './router/loader'
-import { confirmAction, loginAction, logoutAction, otpAction, registerAction } from './router/action'
+import { confirmAction, favouriteAction, loginAction, logoutAction, otpAction, registerAction } from './router/action'
 import AuthRootLayout from './pages/auth/AuthRootLayout'
 import SignUpPage from './pages/auth/SignUpPage'
 import OtpPage from './pages/auth/Opt'
@@ -70,7 +70,7 @@ export const router = createBrowserRouter([
                 Component: ProductRootLayout,
                 children: [
                     { index: true, Component: Product },
-                    { path: ":productId", Component: ProductDetail, loader: productLoader },]
+                    { path: ":productId", Component: ProductDetail, loader: productLoader, action: favouriteAction },]
             },
         ]
     },

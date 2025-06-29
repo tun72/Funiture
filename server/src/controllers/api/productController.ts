@@ -26,7 +26,7 @@ export const getProduct = [
     if (errors.length) {
       return next(createError(errors[0].msg, 400, errorCode.invalid));
     }
-    const user = getUserById(req.userId!);
+    const user = await getUserById(req.userId!);
     checkUserIfNotExist(user);
     const productId = req.params.id;
 
@@ -34,7 +34,7 @@ export const getProduct = [
 
     const key = `products:${JSON.stringify(productId)}`;
     const product = await getOrSetCache(key, async () => {
-      return getProductWithRelations(+productId);
+      return getProductWithRelations(+productId, user!.id);
     });
 
     if (!product) {
@@ -74,10 +74,8 @@ export const getProductsByPagination = [
     const category = req.query.category;
     const type = req.query.type;
 
-    console.log(limit);
-
-    const userId = req.userId;
-    checkUserIfNotExist(userId);
+    const user = await getUserById(req.userId!);
+    checkUserIfNotExist(user);
 
     let categories: number[] = [];
     let types: number[] = [];
@@ -169,7 +167,11 @@ export const toggleFavouriteProduct = [
 
     const { productId, favourite } = req.body;
 
+    console.log(favourite);
+
     if (favourite) {
+      console.log("hit");
+
       await addFavouriteProducts(+productId, user!.id);
     } else {
       await removeFavouriteProducts(+productId, user!.id);

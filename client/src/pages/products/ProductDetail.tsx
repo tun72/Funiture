@@ -1,7 +1,9 @@
 import { oneProductQuery, productQuery } from "@/api/query"
 import { Icons } from "@/components/icons"
 import AddToCartForm from "@/components/products/AddToCartForm"
-import AddToFavourite from "@/components/products/AddToFavourite"
+// import AddToFavourite from "@/components/products/AddToFavourite"
+import AddToFavourite from "@/components/products/TanstackOptimistic"
+
 import ProductCard from "@/components/products/ProductCard"
 import Rating from "@/components/products/Rating"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
@@ -68,7 +70,7 @@ function ProductDetail() {
 
                             <div className="flex items-center justify-between">
                                 <Rating rating={product.rating} />
-                                <AddToFavourite id={String(product.id)} rating={product.rating} className="cursor-pointer" />
+                                <AddToFavourite id={String(product.id)} rating={product.rating} isFavourite={product.users.length > 0} className="cursor-pointer" />
                             </div>
 
                             <AddToCartForm canBuy={product.status === "ACTIVE"} />

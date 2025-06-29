@@ -11,13 +11,13 @@ export const queryClient = new QueryClient({
 
 const fetchProducts = async (q?: string) => {
   const queryString = q ? (q.startsWith("?") ? q : `?${q}`) : "";
-  const response = await api.get(`/user/products${queryString}`);
+  const response = await api.get(`user/products${queryString}`);
   return response.data;
 };
 
 const fetchPosts = async (q?: string) => {
   const queryString = q ? (q.startsWith("?") ? q : `?${q}`) : "";
-  const response = await api.get(`/user/posts${queryString}`);
+  const response = await api.get(`user/posts${queryString}`);
   return response.data;
 };
 

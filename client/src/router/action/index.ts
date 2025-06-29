@@ -1,4 +1,5 @@
 import api, { authApi } from "@/api";
+import { queryClient } from "@/api/query";
 import useAuthStore, { Status } from "@/store/authStore";
 import { AxiosError } from "axios";
 import { ActionFunctionArgs, redirect } from "react-router";
@@ -114,6 +115,40 @@ export const confirmAction = async ({ request }: ActionFunctionArgs) => {
 
     authStore.clearAuth();
     return redirect("/");
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      return error.response?.data || { error: "Registration Failed." };
+    }
+  }
+};
+
+export const favouriteAction = async ({
+  request,
+  params,
+}: ActionFunctionArgs) => {
+  const formData = await request.formData();
+
+  if (!params.productId) {
+    throw new Error("No Product ID provided.");
+  }
+  const data: { productId: number; favourite: boolean } = {
+    productId: Number(params.productId),
+    favourite: formData.get("favourite") === "true",
+  };
+
+  try {
+    const response = await api.patch("user/products/toggle-favourite", data);
+
+    if (response.status !== 200) {
+      return { error: response.data || "Add to Favourite Fail!" };
+    }
+
+    //["product", "detail", id]
+    await queryClient.invalidateQueries({
+      queryKey: ["product", "detail", params.productId],
+    });
+
+    return null;
   } catch (error) {
     if (error instanceof AxiosError) {
       return error.response?.data || { error: "Registration Failed." };

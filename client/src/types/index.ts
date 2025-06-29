@@ -23,6 +23,7 @@ export type Product = {
   rating: number;
   inventory: number;
   status: string;
+  users: [];
 };
 
 type Image = {
