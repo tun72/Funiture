@@ -1,4 +1,4 @@
-import { authApi } from "@/api";
+import api, { authApi } from "@/api";
 import {
   categoryTypeQuery,
   onePostQuery,
@@ -69,6 +69,26 @@ export const confirmLoader = async () => {
   return null;
 };
 
+export const verifyLoader = async () => {
+  const authStore = useAuthStore.getState();
+
+  if (authStore.status !== Status.verify) {
+    return redirect("/reset");
+  }
+
+  return null;
+};
+
+export const resetLoader = async () => {
+  const authStore = useAuthStore.getState();
+
+  if (authStore.status !== Status.reset) {
+    return redirect("/reset");
+  }
+
+  return null;
+};
+
 export const blogInfiniteLoader = async () => {
   await queryClient.ensureInfiniteQueryData(postInfiniteQuery());
   return null;
@@ -96,10 +116,23 @@ export const productLoader = async ({ params }: LoaderFunctionArgs) => {
     throw new Error("No Product ID provided.");
   }
 
-
   await queryClient.ensureQueryData(productQuery("?limit=4"));
   await queryClient.ensureQueryData(oneProductQuery(Number(params.productId)));
   // await queryClient
 
   return { productId: params.productId };
+};
+
+export const accountSettingLoader = async () => {
+  try {
+    const response = await api.get("auth-check");
+    if (response.status !== 200) {
+      throw new Error("Login Required");
+    }
+    return null;
+  } catch (err) {
+    console.log(err);
+
+    return redirect("/login");
+  }
 };

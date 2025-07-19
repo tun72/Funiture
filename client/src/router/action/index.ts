@@ -19,9 +19,14 @@ export const loginAction = async ({ request }: ActionFunctionArgs) => {
       return { error: response.data || "Login Failed." };
     }
 
-    const redirectTo = new URL(request.url).searchParams.get("redirect") || "/";
+    const referer = request;
 
-    // console.log(redirectTo);
+    let redirectTo = "/";
+
+    if (referer) {
+      const url = new URL(referer.url);
+      redirectTo = url.searchParams.get("redirect") || "/";
+    }
 
     return redirect(redirectTo);
   } catch (error) {
@@ -34,7 +39,6 @@ export const loginAction = async ({ request }: ActionFunctionArgs) => {
 export const logoutAction = async () => {
   try {
     await api.post("logout");
-    console.log("hit");
 
     return redirect("/login");
   } catch (error) {
@@ -152,6 +156,108 @@ export const favouriteAction = async ({
   } catch (error) {
     if (error instanceof AxiosError) {
       return error.response?.data || { error: "Registration Failed." };
+    }
+  }
+};
+
+export const passwordResetAction = async ({ request }: ActionFunctionArgs) => {
+  const formData = await request.formData();
+  const credentials = Object.fromEntries(formData);
+
+  const authStore = useAuthStore.getState();
+
+  try {
+    const response = await authApi.post("forget-password", credentials);
+
+    if (response.status !== 200) {
+      return { error: response.data || "Password reset Failed." };
+    }
+
+    authStore.setAuth(response.data.phone, response.data.token, Status.verify);
+
+    return redirect("/reset/verify-otp");
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      return error.response?.data || { error: "Password reset Failed." };
+    }
+  }
+};
+
+export const verifyOtpAction = async ({ request }: ActionFunctionArgs) => {
+  const formData = await request.formData();
+  const authStore = useAuthStore.getState();
+
+  const credentials = {
+    phone: authStore.phone,
+    otp: formData.get("otp"),
+    token: authStore.token,
+  };
+
+  try {
+    const response = await authApi.post("verify", credentials);
+
+    if (response.status !== 200) {
+      return { error: response.data || "Verifying otp failed" };
+    }
+
+    authStore.setAuth(
+      response.data.phone,
+      response.data.verifyToken,
+      Status.reset,
+    );
+
+    return redirect("/reset/new-password");
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      return error.response?.data || { error: "Verifying otp Failed." };
+    }
+  }
+};
+
+export const newPasswordAction = async ({ request }: ActionFunctionArgs) => {
+  const formData = await request.formData();
+  const authStore = useAuthStore.getState();
+
+  const credentials = {
+    phone: authStore.phone,
+    password: formData.get("password"),
+    token: authStore.token,
+  };
+
+  try {
+    const response = await authApi.post("reset-password", credentials);
+
+    if (response.status !== 201) {
+      return { error: response.data || "Registration failed!" };
+    }
+
+    authStore.clearAuth();
+    return redirect("/");
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      return error.response?.data || { error: "Registration Failed." };
+    }
+  }
+};
+
+export const changePasswordAction = async ({ request }: ActionFunctionArgs) => {
+  const formData = await request.formData();
+  const credentials = {
+    currentPassword: formData.get("currentPassword"),
+    newPassword: formData.get("newPassword"),
+    confirmPassword: formData.get("confirmPassword"),
+  };
+
+  try {
+    const response = await authApi.post("change-password", credentials);
+
+    if (response.status !== 200) {
+      return { error: response.data || "Change Password failed!" };
+    }
+    return redirect("/");
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      return error.response?.data || { error: "Change Password failed!" };
     }
   }
 };

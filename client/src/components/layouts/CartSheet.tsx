@@ -10,27 +10,30 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Icons } from "../icons"
 import { Separator } from "../ui/separator";
-import { cartItems } from "@/data/carts";
+
 import { Link } from "react-router";
 
 import CartItem from "../carts/CartItem";
 import { formatPrice } from "@/lib/utils";
 import { ScrollArea } from "../ui/scroll-area";
+import useCartStore from "@/store/cartStore";
 
 export default function CartSheet() {
-    const itemCounts = 4;
-    const totalAmount = 190;
+    const { carts: cartItems } = useCartStore.getState()
+
+    const itemCounts = useCartStore((state) => state.getTotalItems())
+    const totalAmount = useCartStore((state) => state.getTotalPrice())
     return (
         <Sheet>
             <SheetTrigger asChild>
                 <Button variant="outline" className="relative" size="icon" aria-label="Open Cart">
-                    <Badge variant={"destructive"} className="absolute -right-2 -top-2 size-6 justify-center rounded-full p-2.5">{itemCounts}</Badge>
+                    {!!itemCounts && <Badge variant={"destructive"} className="absolute -right-2 -top-2 size-6 justify-center rounded-full p-2.5">{itemCounts}</Badge>}
                     <Icons.cart className="size-4" aria-hidden="true" />
                 </Button>
             </SheetTrigger>
             <SheetContent className="w-full md:max-w-lg pt-9 p-4">
                 <SheetHeader className="p-0 pt-8 text-lg font-bold">
-                    <SheetTitle>Cart Items - {itemCounts}</SheetTitle>
+                    <SheetTitle>{itemCounts > 0 ? `Cart Items - ${itemCounts}` : `Empty Cart`}</SheetTitle>
                 </SheetHeader>
 
                 <Separator className="mb-2" />

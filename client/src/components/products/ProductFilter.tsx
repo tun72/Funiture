@@ -15,17 +15,15 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 
-import type { Category } from "@/types"
+import type { FilterProps } from "@/types"
 
-interface FilterProps {
-    categories: Category[], types: Category[]
-}
 
 interface ProductFilterProps {
     filterList: FilterProps;
     onHandelFilter: (categories: string[], types: string[]) => void,
     categoriesFilter: string[],
-    typesFilter: string[]
+    typesFilter: string[],
+    clearFilter: () => void
 
 }
 const FormSchema = z.object({
@@ -37,7 +35,7 @@ const FormSchema = z.object({
     })
 })
 
-export default function ProductFilter({ filterList, onHandelFilter, categoriesFilter, typesFilter }: ProductFilterProps) {
+export default function ProductFilter({ filterList, onHandelFilter, categoriesFilter, typesFilter, clearFilter }: ProductFilterProps) {
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
@@ -46,6 +44,8 @@ export default function ProductFilter({ filterList, onHandelFilter, categoriesFi
             types: typesFilter
         },
     })
+
+
 
     function onSubmit(data: z.infer<typeof FormSchema>) {
         onHandelFilter(data.categories, data.types)
@@ -149,7 +149,13 @@ export default function ProductFilter({ filterList, onHandelFilter, categoriesFi
                     )}
                 />
 
-                <Button type="submit" variant={"outline"}>Filter</Button>
+                <div className="space-x-2">
+                    <Button type="submit" variant={"outline"}>Filter</Button>
+                    <Button type="button" variant={"outline"} onClick={() => {
+                        form.reset({ categories: [], types: [] })
+                        clearFilter()
+                    }}>Clear</Button>
+                </div>
             </form>
         </Form>
     )

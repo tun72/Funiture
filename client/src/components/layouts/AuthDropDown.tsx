@@ -73,12 +73,21 @@ function AuthDropDown({ user }: UserProps) {
                     </DropdownMenuItem>
 
                     <DropdownMenuItem asChild>
-                        <Link to="#">
+                        <Link to="/account-setting">
                             <Icons.setting className='size-4 mr-0.5' aria-hidden="true" />
                             Setting
                             <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
                         </Link>
                     </DropdownMenuItem>
+
+                    <DropdownMenuItem asChild>
+                        <Link to="/account-setting/password-security">
+                            <Icons.keyIcon className='size-4 mr-0.5' aria-hidden="true" />
+                            Change Password
+                            <DropdownMenuShortcut>⌘C</DropdownMenuShortcut>
+                        </Link>
+                    </DropdownMenuItem>
+
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
 

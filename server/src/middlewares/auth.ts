@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import "dotenv/config";
 import { errorCode } from "../../config/errorCode";
 import { getUserById, updateUser } from "../services/authService";
-import { checkUserIfNotExist } from "../utils/auth";
+import { createError } from "../utils/error";
 
 interface CustomRequest extends Request {
   userId?: number;
@@ -23,10 +23,13 @@ export const auth = (req: CustomRequest, res: Response, next: NextFunction) => {
   const refreshToken = req.cookies ? req.cookies.refreshToken : null;
 
   if (!refreshToken) {
-    const error: any = new Error("You are not an authenticated user.");
-    error.code = errorCode.unauthenticated;
-    error.status = 401;
-    return next(error);
+    return next(
+      createError(
+        "You are not an authenticated user.",
+        401,
+        errorCode.unauthenticated
+      )
+    );
   }
 
   const generateNewToken = async () => {
@@ -37,38 +40,56 @@ export const auth = (req: CustomRequest, res: Response, next: NextFunction) => {
         id: number;
         phone: string;
       };
-
-      console.log(decoded);
     } catch (e) {
-      console.log(e);
-      const error: any = new Error("You are not an authenticated user.");
-      error.code = errorCode.unauthenticated;
-      error.status = 401;
-      return next(error);
+      return next(
+        createError(
+          "You are not an authenticated user.",
+          401,
+          errorCode.unauthenticated
+        )
+      );
     }
 
     if (isNaN(decoded.id)) {
-      const error: any = new Error("You are not an authenticated user.");
-      error.code = errorCode.unauthenticated;
-      error.status = 401;
-      return next(error);
+      return next(
+        createError(
+          "You are not an authenticated user.",
+          401,
+          errorCode.unauthenticated
+        )
+      );
     }
 
     const user = await getUserById(decoded.id);
-    checkUserIfNotExist(user);
+
+    if (!user) {
+      return next(
+        createError(
+          "You're not authenticated user",
+          401,
+          errorCode.unauthenticated
+        )
+      );
+    }
 
     if (user!.phone !== decoded.phone) {
-      const error: any = new Error("You are not an authenticated user.");
-      error.code = errorCode.unauthenticated;
-      error.status = 401;
-      return next(error);
+      return next(
+        createError(
+          "You are not an authenticated user.",
+          401,
+          errorCode.unauthenticated
+        )
+      );
     }
 
     if (user!.randToken !== refreshToken) {
-      const error: any = new Error("You are not an authenticated user.");
-      error.code = errorCode.unauthenticated;
-      error.status = 401;
-      return next(error);
+      return next(
+        createError(
+          "You are not an authenticated user.",
+          401,
+          errorCode.unauthenticated
+        )
+      );
     }
 
     const assessTokenPayload = { id: user!.id };
@@ -125,10 +146,13 @@ export const auth = (req: CustomRequest, res: Response, next: NextFunction) => {
       };
 
       if (isNaN(decoded.id)) {
-        const error: any = new Error("You are not an authenticated user.");
-        error.code = errorCode.unauthenticated;
-        error.status = 401;
-        return next(error);
+        return next(
+          createError(
+            "You are not an authenticated user.",
+            401,
+            errorCode.unauthenticated
+          )
+        );
       }
       req.userId = decoded.id;
       next();
@@ -136,15 +160,13 @@ export const auth = (req: CustomRequest, res: Response, next: NextFunction) => {
       if (e.name === "TokenExpiredError") {
         generateNewToken();
         // next();
-
         // e.message = "Access Token is expired.";
         // e.status = 400;
         // e.code = errorCode.accessTokenExpired;
       } else {
-        e.message = "Access Token is Invalid.";
-        e.status = 400;
-        e.code = errorCode.attack;
-        return next(e);
+        return next(
+          createError("Access Token is Invalid.", 400, errorCode.attack)
+        );
       }
     }
   }

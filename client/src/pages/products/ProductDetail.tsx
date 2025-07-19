@@ -18,6 +18,7 @@ import { Product } from "@/types"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import Autoplay from "embla-carousel-autoplay"
 import { useLoaderData, useNavigate } from "react-router"
+import useCartStore from "@/store/cartStore"
 
 function ProductDetail() {
     const { productId } = useLoaderData()
@@ -30,6 +31,17 @@ function ProductDetail() {
     const product: Product = productDetail.product
     const products: Product[] = productsData.products
 
+    const { addToCart } = useCartStore()
+
+    function handelCart(quantity: number) {
+        addToCart({
+            id: productId,
+            quantity,
+            image: product.images[0].path,
+            name: product.name,
+            price: product.price
+        })
+    }
 
     return (
         <>
@@ -73,7 +85,7 @@ function ProductDetail() {
                                 <AddToFavourite id={String(product.id)} rating={product.rating} isFavourite={product.users.length > 0} className="cursor-pointer" />
                             </div>
 
-                            <AddToCartForm canBuy={product.status === "ACTIVE"} />
+                            <AddToCartForm canBuy={product.status === "ACTIVE"} onHandelCart={handelCart} idInCart={productId} />
                             <Separator className="my-1.5" />
 
                             <Accordion type="single" collapsible className="w-full">

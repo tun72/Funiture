@@ -9,12 +9,17 @@ import ProductDetail from '@/pages/products/ProductDetail'
 import Product from '@/pages/products/Product'
 import { Suspense } from 'react'
 import Login from '@/pages/auth/Login'
-import { blogInfiniteLoader, confirmLoader, homeLoader, loginLoader, otpLoader, postLoader, productLoader } from './router/loader'
-import { confirmAction, favouriteAction, loginAction, logoutAction, otpAction, registerAction } from './router/action'
+import { accountSettingLoader, blogInfiniteLoader, confirmLoader, homeLoader, loginLoader, otpLoader, postLoader, productLoader, resetLoader, verifyLoader } from './router/loader'
+import { changePasswordAction, confirmAction, favouriteAction, loginAction, logoutAction, newPasswordAction, otpAction, passwordResetAction, registerAction, verifyOtpAction } from './router/action'
 import AuthRootLayout from './pages/auth/AuthRootLayout'
 import SignUpPage from './pages/auth/SignUpPage'
 import OtpPage from './pages/auth/Opt'
 import ConfirmPasswordPage from './pages/auth/ConfirmPassword'
+import VerifyOtpPage from './pages/auth/VerifyOtpPage'
+import NewPasswordPage from './pages/auth/NewPasswordPage'
+import ResetPasswordPage from './pages/auth/ResetPasswordPage'
+import AccountSettingRootLayout from './pages/account/AccountSettingRootLayout'
+import PasswordSecurity from './pages/account/PasswordSecurity'
 
 
 
@@ -72,6 +77,15 @@ export const router = createBrowserRouter([
                     { index: true, Component: Product },
                     { path: ":productId", Component: ProductDetail, loader: productLoader, action: favouriteAction },]
             },
+            {
+                path: "account-setting",
+                Component: AccountSettingRootLayout,
+                loader: accountSettingLoader,
+                children: [
+                    { path: "password-security", Component: PasswordSecurity, action: changePasswordAction }
+                ]
+
+            }
         ]
     },
     {
@@ -87,6 +101,19 @@ export const router = createBrowserRouter([
             { Component: SignUpPage, loader: loginLoader, action: registerAction, index: true },
             { path: "otp", Component: OtpPage, loader: otpLoader, action: otpAction },
             { path: "confirm-password", Component: ConfirmPasswordPage, loader: confirmLoader, action: confirmAction }
+        ]
+    },
+    {
+        path: "/reset",
+        Component: AuthRootLayout,
+        children: [
+            { Component: ResetPasswordPage, action: passwordResetAction, index: true },
+            {
+                path: "verify-otp", Component: VerifyOtpPage, loader: verifyLoader, action: verifyOtpAction
+            },
+            {
+                path: "new-password", Component: NewPasswordPage, loader: resetLoader, action: newPasswordAction
+            }
         ]
     },
     {

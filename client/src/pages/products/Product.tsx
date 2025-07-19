@@ -1,22 +1,18 @@
-
-
 import { categoryTypeQuery, productInfiniteQuery, queryClient } from "@/api/query"
-
 import ProductCard from "@/components/products/ProductCard"
 import ProductFilter from "@/components/products/ProductFilter"
 import { Button } from "@/components/ui/button"
-
-
+import useFilterStore from "@/store/filterStore"
 import { useInfiniteQuery, useSuspenseQuery } from "@tanstack/react-query"
 import { useSearchParams } from "react-router"
 
 export default function Product() {
     const [searchParams, setSearchParams] = useSearchParams()
 
+    const { addCategories, addTypes } = useFilterStore()
+
     const rawCategories = searchParams.get("categories");
     const rawTypes = searchParams.get("types");
-
-
 
     const categoriesFilter = rawCategories ? decodeURIComponent(rawCategories).split(",").map((cat) => Number(cat)).filter((cat) => !isNaN(cat)).map((type) => type.toString()) : []
     const typesFilter = rawTypes ? decodeURIComponent(rawTypes).split(",").map((type) => Number(type)).filter((type) => !isNaN(type)).map((type) => type.toString()) : []
@@ -26,7 +22,7 @@ export default function Product() {
 
     const { data: categoryTypeData } = useSuspenseQuery(categoryTypeQuery());
 
-    console.log("Category", cat, "type", type);
+    // console.log("Category", cat, "type", type);
 
     const {
         data,
@@ -46,26 +42,29 @@ export default function Product() {
 
     const filterList = { categories: categoryTypeData.categories, types: categoryTypeData.types }
 
+    const { clearFilter } = useFilterStore()
+
     const handelFilter = (categories: string[], types: string[]) => {
         const searchParams = new URLSearchParams()
-
-
         if (categories.length > 0) {
-
             searchParams.set("categories", encodeURIComponent(categories.join(",")))
+            addCategories(categories.join(","))
         }
-
         if (types.length > 0) {
             searchParams.set("types", encodeURIComponent(types.join(",")))
+            addTypes(types.join(","))
         }
-
-
         setSearchParams(searchParams)
         queryClient.cancelQueries({ queryKey: ["products", "infinite"] })
         queryClient.removeQueries({ queryKey: ["products", "infinite"] })
-
         refetch()
+    }
 
+    const handelClearFilter = () => {
+        searchParams.delete("categories")
+        searchParams.delete("types")
+        clearFilter()
+        setSearchParams(searchParams)
 
     }
 
@@ -73,7 +72,7 @@ export default function Product() {
     return status === "pending" ? (<p>Loading</p>) : status === "error" ? <p>{error.message}</p> : (
         <div className="flex flex-col lg:flex-row">
             <section className="my-8 w-full lg:w-1/5">
-                <ProductFilter filterList={filterList} onHandelFilter={handelFilter} categoriesFilter={categoriesFilter} typesFilter={typesFilter} />
+                <ProductFilter filterList={filterList} onHandelFilter={handelFilter} clearFilter={handelClearFilter} categoriesFilter={categoriesFilter} typesFilter={typesFilter} />
 
             </section>
             <section className="w-full lg:w-4/5 my-8">

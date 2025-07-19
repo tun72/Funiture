@@ -1,5 +1,5 @@
 import { Response, Request, NextFunction } from "express";
-import { body, validationResult } from "express-validator";
+import { body, query, validationResult } from "express-validator";
 import {
   createOtp,
   createUser,
@@ -491,6 +491,10 @@ export const forgetPassword = [
     // return res.status(200).json({message : "success"})
     let phone = req.body.phone;
 
+    if (phone.slice(0, 2) === "09") {
+      phone = phone.substring(2, phone.length);
+    }
+
     const user = await getUserByPhone(phone);
     checkUserIfNotExist(user);
 
@@ -717,3 +721,74 @@ export const authCheck = async (
     image: user!.image,
   });
 };
+
+export const changePassword = [
+  body("currentPassword", "Please provide a current password.")
+    .trim("")
+    .notEmpty()
+    .isLength({ min: 8 })
+    .withMessage("Password must be minium of 8 characters."),
+  body("newPassword", "Please provide a new password.")
+    .trim("")
+    .notEmpty()
+    .isLength({ min: 8 })
+    .withMessage("Password must be minium of 8 characters."),
+  body("confirmPassword", "Please provide a confirm password.")
+    .trim("")
+    .notEmpty()
+    .isLength({ min: 8 })
+    .withMessage("Password must be minium of 8 characters."),
+
+  async (req: CustomRequest, res: Response, next: NextFunction) => {
+    const errors = validationResult(req).array({ onlyFirstError: true });
+    if (errors.length) {
+      // console.log(errors);
+      return next(createError(errors[0].msg, 400, errorCode.invalid));
+    }
+
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    const userId = req.userId;
+    const user = await getUserById(userId!);
+    checkUserIfNotExist(user);
+
+    if (newPassword !== confirmPassword) {
+      return next(
+        createError(
+          "Password are not match. Please try again.",
+          400,
+          errorCode.invalid
+        )
+      );
+    }
+
+    if (currentPassword === newPassword) {
+      return next(
+        createError("Please use different password.", 400, errorCode.invalid)
+      );
+    }
+
+    const isMatchPassword = await bcrypt.compare(
+      currentPassword,
+      user!.password
+    );
+
+    if (!isMatchPassword) {
+      return next(
+        createError("Your current password is wrong.", 400, errorCode.invalid)
+      );
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashPassword = await bcrypt.hash(newPassword, salt);
+
+    const data = {
+      password: hashPassword,
+      lastChangePassword: new Date(),
+    };
+
+    await updateUser(user!.id, data);
+
+    res.status(200).json({ message: "Password changed successfully." });
+  },
+];
