@@ -15,12 +15,17 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 
-import type { Category } from "@/types"
+import type { FilterProps } from "@/types"
 
-interface FilterProps {
-    filterList: { categories: Category[], types: Category[] }
+
+interface ProductFilterProps {
+    filterList: FilterProps;
+    onHandelFilter: (categories: string[], types: string[]) => void,
+    categoriesFilter: string[],
+    typesFilter: string[],
+    clearFilter: () => void
+
 }
-
 const FormSchema = z.object({
     categories: z.array(z.string()).refine((value) => value.some((item) => item), {
         message: "You have to select at least one categories"
@@ -30,19 +35,20 @@ const FormSchema = z.object({
     })
 })
 
-export default function ProductFilter({ filterList }: FilterProps) {
+export default function ProductFilter({ filterList, onHandelFilter, categoriesFilter, typesFilter, clearFilter }: ProductFilterProps) {
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
-            categories: [],
-            types: []
+            categories: categoriesFilter,
+            types: typesFilter
         },
     })
 
-    function onSubmit(data: z.infer<typeof FormSchema>) {
-        console.log(data);
 
+
+    function onSubmit(data: z.infer<typeof FormSchema>) {
+        onHandelFilter(data.categories, data.types)
     }
 
     return (
@@ -55,7 +61,6 @@ export default function ProductFilter({ filterList }: FilterProps) {
                         <FormItem>
                             <div className="mb-4">
                                 <FormLabel className="text-base">Funitures Made By</FormLabel>
-
                             </div>
                             {filterList.categories.map((item) => (
                                 <FormField
@@ -66,26 +71,25 @@ export default function ProductFilter({ filterList }: FilterProps) {
                                         return (
                                             <FormItem
                                                 key={item.id}
-                                                className="flex flex-row items-start space-x-3 space-y-0"
+                                                className="flex flex-row items-center space-x-2 space-y-0"
                                             >
                                                 <FormControl>
                                                     <Checkbox
-
                                                         className="data-[state=checked]:bg-brand/90"
-                                                        checked={field.value?.includes(item.id)}
+                                                        checked={field.value?.includes(item.id.toString())}
                                                         onCheckedChange={(checked) => {
                                                             return checked
-                                                                ? field.onChange([...field.value, item.id])
+                                                                ? field.onChange([...field.value, item.id.toString()])
                                                                 : field.onChange(
                                                                     field.value?.filter(
-                                                                        (value) => value !== item.id
+                                                                        (value) => value !== item.id.toString()
                                                                     )
                                                                 )
                                                         }}
                                                     />
                                                 </FormControl>
                                                 <FormLabel className="text-sm font-normal">
-                                                    {item.label}
+                                                    {item.name}
                                                 </FormLabel>
                                             </FormItem>
                                         )
@@ -115,25 +119,25 @@ export default function ProductFilter({ filterList }: FilterProps) {
                                         return (
                                             <FormItem
                                                 key={item.id}
-                                                className="flex flex-row items-start space-x-3 space-y-0"
+                                                className="flex flex-row items-center space-x-2 space-y-0"
                                             >
                                                 <FormControl>
                                                     <Checkbox
                                                         className="data-[state=checked]:bg-brand/90"
-                                                        checked={field.value?.includes(item.id)}
+                                                        checked={field.value?.includes(item.id.toString())}
                                                         onCheckedChange={(checked) => {
                                                             return checked
-                                                                ? field.onChange([...field.value, item.id])
+                                                                ? field.onChange([...field.value, item.id.toString()])
                                                                 : field.onChange(
                                                                     field.value?.filter(
-                                                                        (value) => value !== item.id
+                                                                        (value) => value !== item.id.toString()
                                                                     )
                                                                 )
                                                         }}
                                                     />
                                                 </FormControl>
                                                 <FormLabel className="text-sm font-normal">
-                                                    {item.label}
+                                                    {item.name}
                                                 </FormLabel>
                                             </FormItem>
                                         )
@@ -145,7 +149,13 @@ export default function ProductFilter({ filterList }: FilterProps) {
                     )}
                 />
 
-                <Button type="submit" variant={"outline"}>Filter</Button>
+                <div className="space-x-2">
+                    <Button type="submit" variant={"outline"}>Filter</Button>
+                    <Button type="button" variant={"outline"} onClick={() => {
+                        form.reset({ categories: [], types: [] })
+                        clearFilter()
+                    }}>Clear</Button>
+                </div>
             </form>
         </Form>
     )

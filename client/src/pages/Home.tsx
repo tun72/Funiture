@@ -9,6 +9,7 @@ import ProductCard from "@/components/products/ProductCard";
 import { Product } from "@/types";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { postQuery, productQuery } from "@/api/query";
+import useFilterStore from "@/store/filterStore";
 export default function Home() {
   // loader
   // v1
@@ -47,7 +48,7 @@ export default function Home() {
   // v3
   const { data: productsData } = useSuspenseQuery(productQuery("?limit=8"))
   const { data: postsData } = useSuspenseQuery(postQuery("?limit=3"))
-
+  const productsLink = useFilterStore((state) => state.getFilterLink())
   return <div className="container mx-auto px-4 md:px-0">
     <div className="flex flex-col lg:flex-row justify-between">
       <div className="text-center lg:text-left my-8 lg:mt-18 lb:mb-0 lg:w-2/5">
@@ -71,7 +72,8 @@ export default function Home() {
 
 
     {productsData && <CarouselCard products={productsData.products} />}
-    <Title title="Feature Products" href="/products" sideText="view All Products" />
+    <Title title="Feature Products" href={productsLink} sideText="view All Products" />
+
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {productsData && productsData.products.slice(0, 4).map((product: Product) => (<ProductCard product={product} key={product.id} />))}
     </div>

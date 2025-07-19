@@ -59,22 +59,25 @@ model Type {
 }
 
 model User {
-  id              Int       @id @default(autoincrement())
-  firstName       String?   @db.VarChar(52)
-  lastName        String?
-  phone           String    @unique @db.VarChar(52)
-  email           String?   @unique @db.VarChar(52)
-  role            Role      @default(USER)
-  status          Status    @default(ACTIVE)
-  lastLogin       DateTime?
-  errorLoginCount Int       @default(0) @db.SmallInt
-  randToken       String
-  password        String
-  image           String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  posts           Post[]
-  orders          Order[]
+  id                 Int       @id @default(autoincrement())
+  firstName          String?   @db.VarChar(52)
+  lastName           String?
+  phone              String    @unique @db.VarChar(52)
+  email              String?   @unique @db.VarChar(52)
+  role               Role      @default(USER)
+  status             Status    @default(ACTIVE)
+  lastLogin          DateTime?
+  errorLoginCount    Int       @default(0) @db.SmallInt
+  randToken          String
+  password           String
+  image              String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  lastChangePassword DateTime?
+
+  posts      Post[]
+  orders     Order[]
+  favourites Product[]
 
   @@map("users")
 }
@@ -124,6 +127,7 @@ model Product {
   images      Image[]
   orders      ProductsOnOrder[]
   tags        ProductTag[]
+  users       User[]
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 }
